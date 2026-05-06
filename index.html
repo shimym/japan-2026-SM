@@ -1,0 +1,834 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Japan Reiseplan 2026 · 8.–25. September</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,600;0,700;1,400&family=DM+Sans:wght@300;400;500;600&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<style>
+:root{--red:#C0392B;--ink:#1A1714;--ink2:#3D3A36;--grey:#7A776F;--grey-light:#C8C5BE;--cream:#F8F6F1;--cream2:#F0EDE6;--white:#FEFDFB;--food:#0D7A5F;--gold:#B8860B}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+html{scroll-behavior:smooth}
+body{font-family:"DM Sans",sans-serif;background:var(--cream);color:var(--ink);font-size:14px;line-height:1.6}
+@media print{.no-print{display:none!important}body{background:white;font-size:11px}}
+nav{position:fixed;top:0;left:0;right:0;z-index:100;background:rgba(26,23,20,.96);backdrop-filter:blur(12px);display:flex;align-items:center;padding:0 1.5rem;height:52px;border-bottom:1px solid rgba(255,255,255,.08);gap:8px}
+.nav-logo{font-family:"Cormorant Garamond",serif;font-size:17px;color:white;font-weight:600;margin-right:.5rem;white-space:nowrap}
+.nav-logo span{color:var(--red)}
+.print-btn{margin-left:auto;background:var(--red);color:white;border:none;padding:6px 14px;border-radius:4px;cursor:pointer;font-size:11px;font-weight:600;letter-spacing:.05em;font-family:"DM Sans",sans-serif}
+.print-btn:hover{background:#e04535}
+.etap-nav{position:sticky;top:52px;z-index:90;background:#111;display:flex;overflow-x:auto;border-bottom:1px solid rgba(255,255,255,.08);scrollbar-width:none}
+.etap-nav::-webkit-scrollbar{display:none}
+.etap-btn{padding:11px 18px;border:none;background:transparent;color:rgba(255,255,255,.45);font-size:11.5px;font-weight:500;letter-spacing:.04em;cursor:pointer;white-space:nowrap;border-bottom:2px solid transparent;transition:all .2s;font-family:"DM Sans",sans-serif;flex-shrink:0}
+.etap-btn:hover{color:rgba(255,255,255,.8)}
+.etap-btn[data-e="cover"].active{color:#ddd;border-bottom-color:#666}
+.etap-btn[data-e="tokyo"].active{color:#60A5E8;border-bottom-color:#1A6BAA}
+.etap-btn[data-e="hakone"].active{color:#3DC9A0;border-bottom-color:#0D7A5F}
+.etap-btn[data-e="kyoto"].active{color:#E070A8;border-bottom-color:#A03060}
+.etap-btn[data-e="ishigaki"].active{color:#E0A840;border-bottom-color:#C07000}
+.etap-btn[data-e="info"].active{color:#ccc;border-bottom-color:#666}
+.etap-section{display:none}
+.etap-section.visible{display:block}
+/* COVER */
+.cover{min-height:88vh;background:var(--ink);display:flex;flex-direction:column;justify-content:flex-end;padding:5rem 4rem 4rem;position:relative;overflow:hidden}
+.cover::before{content:"";position:absolute;inset:0;background:radial-gradient(ellipse at 80% 20%,rgba(192,57,43,.25) 0%,transparent 60%),radial-gradient(ellipse at 20% 80%,rgba(26,107,170,.15) 0%,transparent 50%)}
+.cvgrid{position:absolute;inset:0;background-image:linear-gradient(rgba(255,255,255,.03) 1px,transparent 1px),linear-gradient(90deg,rgba(255,255,255,.03) 1px,transparent 1px);background-size:60px 60px}
+.cv-tag{font-family:"DM Mono",monospace;font-size:11px;color:var(--red);letter-spacing:.15em;margin-bottom:1.5rem;position:relative}
+.cv-title{font-family:"Cormorant Garamond",serif;font-size:clamp(56px,9vw,110px);font-weight:700;color:white;line-height:.9;position:relative;letter-spacing:-.02em}
+.cv-title span{color:var(--red)}
+.cv-sub{font-size:15px;color:rgba(255,255,255,.5);margin-top:1.5rem;position:relative;font-weight:300}
+.cv-pills{display:flex;gap:6px;margin-top:2rem;position:relative;flex-wrap:wrap}
+.cv-pill{padding:8px 16px;border-radius:6px;border:1px solid rgba(255,255,255,.1);color:white;cursor:pointer;font-size:12px;font-weight:500;font-family:"DM Sans",sans-serif;transition:all .2s;background:transparent}
+.cv-pill:hover{border-color:rgba(255,255,255,.35);transform:translateY(-2px)}
+/* TIMELINE */
+.timeline{display:flex;border-radius:12px;overflow:hidden;margin:2rem 4rem;min-height:68px}
+.tl-seg{display:flex;flex-direction:column;justify-content:center;padding:10px 14px;color:white;cursor:pointer;transition:opacity .2s;flex:1;min-width:70px}
+.tl-seg:hover{opacity:.85}
+.tl-city{font-size:11.5px;font-weight:600;white-space:nowrap}
+.tl-dates{font-size:9.5px;opacity:.75;margin-top:1px}
+.tl-nights{font-size:9px;opacity:.6;margin-top:1px}
+/* LEGEND */
+.leg-sec{background:var(--white);padding:1.2rem 4rem;border-bottom:1px solid var(--cream2)}
+.leg-title{font-family:"DM Mono",monospace;font-size:10px;letter-spacing:.1em;color:var(--grey);margin-bottom:.6rem}
+.leg-grid{display:flex;flex-wrap:wrap;gap:5px}
+.badge{display:inline-flex;padding:2px 8px;border-radius:20px;font-size:10px;font-weight:600;letter-spacing:.03em;white-space:nowrap}
+.bm{background:#E6F1FB;color:#0C447C}.bge{background:#EEEDFE;color:#3C3489}.bart{background:#FAEEDA;color:#633806}
+.bnight{background:#EEECEA;color:#333330}.bm2{background:#C07000;color:white}.bm1{background:#F5C842;color:#3A2000}
+.bbib{background:#FAEEDA;color:#5C3008}.big{background:#E8F5E9;color:#1B5E20}.bcn{background:#FAECE7;color:#4A1B0C}
+.blp{background:#EAF3DE;color:#173404}.bto{background:#E3EFF9;color:#0C3260}.bmono{background:#EEECEA;color:#2C2C2A}
+.bry{background:#E1F5EE;color:#085041}.bos{background:#FCEBEB;color:#7A2020}.bincl{background:#E8F5E9;color:#1B5E20}
+/* HOTEL CARDS */
+.hcard{border-radius:12px;padding:12px 16px;margin:1rem 4rem 1rem;border-left-width:3px;border-left-style:solid}
+.hcard .ht{font-size:11px;font-weight:500;letter-spacing:.05em;opacity:.8}
+.hcard .hn{font-size:15px;font-weight:500;margin-top:2px}
+.hcard .hd{font-size:12px;margin-top:4px;line-height:1.55}
+.hcard-b{background:#E3EFF9;border-left-color:#1A6BAA;color:#061E3F}
+.hcard-g{background:#E1F5EE;border-left-color:#0F6E56;color:#04342C}
+.hcard-p{background:#FBEAF0;border-left-color:#A03060;color:#3A0820}
+.hcard-a{background:#E3F2FD;border-left-color:#0D7ABA;color:#062D4A}
+/* MAP */
+.map-wrap{margin:0 4rem 1rem;border-radius:10px;overflow:hidden;height:250px;border:1px solid var(--cream2)}
+.lmap{width:100%;height:100%}
+/* DAY CARDS */
+.day-card{background:var(--white);margin:1.5rem 4rem;border-radius:16px;box-shadow:0 2px 20px rgba(0,0,0,.06);overflow:hidden}
+.day-hdr{padding:1.2rem 2rem 1rem;display:flex;align-items:flex-start;gap:1rem}
+.day-num{width:48px;height:48px;border-radius:10px;display:flex;flex-direction:column;align-items:center;justify-content:center;flex-shrink:0;color:white}
+.d-tag{font-size:8px;font-weight:700;letter-spacing:.1em;opacity:.7}
+.d-n{font-size:22px;font-weight:700;line-height:1}
+.day-title{font-family:"Cormorant Garamond",serif;font-size:24px;font-weight:700;color:var(--ink);line-height:1.1}
+.day-sub{font-size:12px;color:var(--grey);margin-top:3px}
+/* SCHEDULE BAR */
+.sbar{background:var(--cream2);margin:0 2rem 1rem;border-radius:8px;padding:8px 12px;display:flex;gap:8px;align-items:flex-start}
+.slabel{font-size:9px;font-weight:700;letter-spacing:.1em;color:var(--red);white-space:nowrap;padding-top:1px;font-family:"DM Mono",monospace;flex-shrink:0;text-transform:uppercase}
+.stext{font-size:11.5px;line-height:1.55}
+/* TRANSFER BAR */
+.tbar{background:#F1EFE8;border-radius:8px;padding:8px 12px;margin:0 2rem .8rem;display:flex;gap:8px;border-left:2px solid #888780}
+.tlabel{font-size:9px;font-weight:700;letter-spacing:.1em;color:#444;white-space:nowrap;padding-top:1px;font-family:"DM Mono",monospace;flex-shrink:0;text-transform:uppercase}
+.ttext{font-size:12px;line-height:1.6}
+/* SLOTS */
+.slot{padding:0 2rem;margin-bottom:1rem}
+.slot-hdr{display:flex;align-items:center;gap:8px;margin-bottom:.6rem}
+.slot-pill{background:var(--red);color:white;padding:3px 10px;border-radius:20px;font-size:9px;font-weight:700;letter-spacing:.1em;font-family:"DM Mono",monospace}
+.slot-line{flex:1;height:1px;background:var(--cream2)}
+/* ACTIVITIES */
+.act{background:var(--cream);border-radius:8px;padding:9px 12px;margin-bottom:8px;border:1px solid transparent}
+.act:hover{border-color:var(--cream2)}
+.act-name{font-size:13px;font-weight:600;line-height:1.3;margin-bottom:2px}
+.act-note{font-size:11.5px;color:var(--grey);line-height:1.4}
+.act-price{font-size:11px;font-weight:600;color:var(--food);font-family:"DM Mono",monospace;margin-top:2px}
+.act-open{font-size:10px;color:var(--grey-light)}
+/* FOOD */
+.food-sec{background:var(--cream);border-radius:8px;overflow:hidden;margin-top:10px;border:1px solid var(--cream2)}
+.food-hdr{padding:5px 12px;background:var(--cream2);font-size:9px;font-weight:700;letter-spacing:.1em;color:var(--grey);font-family:"DM Mono",monospace}
+.food-opts{display:grid;grid-template-columns:repeat(3,1fr)}
+@media(max-width:600px){.food-opts,.timeline{grid-template-columns:1fr;display:block}}
+.food-opt{padding:9px 11px;border-right:1px solid var(--cream2)}
+.food-opt:last-child{border-right:none}
+.food-lbl{display:inline-flex;font-size:9px;font-weight:700;padding:2px 7px;border-radius:20px;margin-bottom:3px}
+.food-name{font-size:12px;font-weight:600;line-height:1.3}
+.food-note{font-size:11px;color:var(--grey);line-height:1.4;margin-top:1px}
+.food-price{font-size:11px;font-weight:600;color:var(--food);font-family:"DM Mono",monospace;margin-top:2px}
+/* ALERT BOXES */
+.warn{background:#FCEBEB;border-left:3px solid var(--red);border-radius:0 6px 6px 0;padding:6px 11px;font-size:11.5px;color:#7A1A1A;margin:0 2rem .8rem}
+.tip{background:#FFFBF0;border-left:3px solid var(--gold);border-radius:0 6px 6px 0;padding:6px 11px;font-size:11.5px;color:var(--ink2);font-style:italic;margin-top:6px}
+.osaka-bar{background:#FCEBEB;border-radius:8px;padding:8px 12px;margin:0 2rem .8rem;border-left:3px solid #A32D2D;font-size:12px;color:#501313;line-height:1.6}
+.included-box{background:#E8F5E9;border-radius:8px;padding:9px 12px;margin:.5rem 4rem;border-left:3px solid #2E7D32;font-size:12px;color:#1B5E20;line-height:1.7}
+/* CHECKLIST */
+.cl-sec{background:var(--white);margin:1.5rem 4rem;border-radius:16px;box-shadow:0 2px 20px rgba(0,0,0,.06);overflow:hidden}
+.cl-hdr{background:var(--ink);padding:1.2rem 2rem}
+.cl-hdr h2{font-family:"Cormorant Garamond",serif;font-size:22px;color:white;font-weight:700}
+.cl-body{padding:1.2rem 2rem}
+.cl-group{margin-bottom:1.2rem}
+.cl-gt{font-size:10px;font-weight:700;letter-spacing:.12em;color:var(--red);margin-bottom:6px;font-family:"DM Mono",monospace}
+.cl-item{display:grid;grid-template-columns:24px 1fr;gap:6px;padding:6px 0;border-bottom:1px solid var(--cream2);font-size:12px;line-height:1.5}
+.cl-item:last-child{border-bottom:none}
+.cb{width:18px;height:18px;border:1.5px solid var(--grey-light);border-radius:4px;cursor:pointer;position:relative;flex-shrink:0;margin-top:1px}
+.cb:hover{border-color:var(--red)}
+.cb.checked{background:var(--food);border-color:var(--food)}
+.cb.checked::after{content:"✓";position:absolute;top:-1px;left:2px;color:white;font-size:12px;font-weight:700}
+/* ROUTE OPTIONS */
+.route-opt{padding:10px 13px;background:var(--cream);border-radius:8px;margin:0 4rem 8px;border-left:3px solid var(--cream2)}
+.route-opt.rec{border-left-color:#1A6BAA}
+.route-label{font-size:10px;font-weight:600;letter-spacing:.05em;color:var(--grey);text-transform:uppercase;margin-bottom:3px}
+.route-detail{font-size:12.5px;line-height:1.65}
+.route-note{font-size:11.5px;color:var(--grey);margin-top:2px}
+.info-card{background:var(--white);border-radius:12px;padding:1.5rem;margin:0 4rem 1rem;box-shadow:0 2px 12px rgba(0,0,0,.05)}
+.info-card h3{font-family:"Cormorant Garamond",serif;font-size:20px;margin-bottom:.8rem;color:var(--ink)}
+footer{background:var(--ink);padding:2rem 4rem;color:rgba(255,255,255,.4);font-size:11px;line-height:2;margin-top:3rem}
+footer strong{color:rgba(255,255,255,.7)}
+@media(max-width:700px){
+.cover{padding:3rem 1.5rem 2rem}
+.timeline,.day-card,.cl-sec,.hcard,.map-wrap,.included-box,.route-opt,.info-card,.leg-sec{margin-left:1rem!important;margin-right:1rem!important}
+.day-hdr,.slot,.sbar,.tbar,.warn,.osaka-bar{padding-left:1rem;padding-right:1rem}
+}
+</style>
+</head>
+<body>
+
+<!-- NAV -->
+<nav class="no-print">
+  <div class="nav-logo">Japan Reise <span>2026</span></div>
+  <button class="print-btn" onclick="window.print()">⬇ Als PDF</button>
+</nav>
+
+<!-- ETAPPEN TABS -->
+<div class="etap-nav no-print">
+  <button class="etap-btn active" data-e="cover" onclick="showE('cover')">Übersicht</button>
+  <button class="etap-btn" data-e="tokyo" onclick="showE('tokyo')">🏙 Tokio · 8–14 Sep</button>
+  <button class="etap-btn" data-e="hakone" onclick="showE('hakone')">⛰ Hakone · 14–16 Sep</button>
+  <button class="etap-btn" data-e="kyoto" onclick="showE('kyoto')">⛩ Kyoto/Osaka · 16–19 Sep</button>
+  <button class="etap-btn" data-e="ishigaki" onclick="showE('ishigaki')">🏝 Ishigaki · 19–24 Sep</button>
+  <button class="etap-btn" data-e="info" onclick="showE('info')">✈ Rückreise & Buchungen</button>
+</div>
+
+<!-- ═══════════════════ COVER ═══════════════════ -->
+<section class="etap-section visible" id="section-cover">
+<div class="cover">
+  <div class="cvgrid"></div>
+  <div class="cv-tag">REISEPLAN · 8.–25. SEPTEMBER 2026 · 2 PERSONEN</div>
+  <h1 class="cv-title">JAPAN<br><span>17 Nächte</span></h1>
+  <p class="cv-sub">Tokio · Hakone · Kyoto · Osaka · Ishigaki · Cosmopolitan &amp; Kuratiert</p>
+  <div class="cv-pills">
+    <button class="cv-pill" style="background:rgba(26,107,170,.2);border-color:rgba(26,107,170,.4)" onclick="showE('tokyo')">🏙 Tokio · 8–14 Sep · 6 Nächte</button>
+    <button class="cv-pill" style="background:rgba(13,122,95,.2);border-color:rgba(13,122,95,.4)" onclick="showE('hakone')">⛰ Hakone · 14–16 Sep · 2 Nächte</button>
+    <button class="cv-pill" style="background:rgba(160,48,96,.2);border-color:rgba(160,48,96,.4)" onclick="showE('kyoto')">⛩ Kyoto/Osaka · 16–19 Sep · 3 Nächte</button>
+    <button class="cv-pill" style="background:rgba(192,112,0,.2);border-color:rgba(192,112,0,.4)" onclick="showE('ishigaki')">🏝 Ishigaki · 19–24 Sep · 5 Nächte</button>
+    <button class="cv-pill" style="background:rgba(70,70,70,.2);border-color:rgba(70,70,70,.4)" onclick="showE('info')">✈ Rückreise 24–25 Sep</button>
+  </div>
+</div>
+
+<div class="timeline no-print">
+  <div class="tl-seg" style="background:#1A6BAA;flex:3" onclick="showE('tokyo')"><div class="tl-city">TOKIO</div><div class="tl-dates">8.–14. Sep</div><div class="tl-nights">6 Nächte · Blossom Hibiya</div></div>
+  <div class="tl-seg" style="background:#0D7A5F;flex:1.2" onclick="showE('hakone')"><div class="tl-city">HAKONE</div><div class="tl-dates">14.–16. Sep</div><div class="tl-nights">2 Nächte · Ryokan</div></div>
+  <div class="tl-seg" style="background:#A03060;flex:1.8" onclick="showE('kyoto')"><div class="tl-city">KYOTO/OSAKA</div><div class="tl-dates">16.–19. Sep</div><div class="tl-nights">3 Nächte · Hotel Alza</div></div>
+  <div class="tl-seg" style="background:#C07000;flex:2.5" onclick="showE('ishigaki')"><div class="tl-city">ISHIGAKI</div><div class="tl-dates">19.–24. Sep</div><div class="tl-nights">5 Nächte · Club Med</div></div>
+  <div class="tl-seg" style="background:#444440;flex:1" onclick="showE('info')"><div class="tl-city">RÜCKREISE</div><div class="tl-dates">24.–25. Sep</div><div class="tl-nights">Tokio → ZRH</div></div>
+</div>
+
+<div class="leg-sec no-print">
+  <div class="leg-title">QUELLEN &amp; KATEGORIE-LEGENDE</div>
+  <div class="leg-grid">
+    <span class="badge bm">Top Sight</span><span class="badge bge">Geheimtipp</span><span class="badge bart">Kunst &amp; Design</span>
+    <span class="badge bm2">★★ Michelin</span><span class="badge bm1">★ Michelin</span><span class="badge bbib">Bib Gourmand</span>
+    <span class="badge big">● IG</span><span class="badge bcn">Condé Nast</span><span class="badge blp">Lonely Planet</span>
+    <span class="badge bto">Time Out</span><span class="badge bmono">Monocle</span><span class="badge bry">Onsen/Ryokan</span>
+    <span class="badge bincl">Inkludiert</span><span class="badge bos">Osaka</span>
+  </div>
+</div>
+</section>
+
+<!-- ═══════════════════ TOKIO ═══════════════════ -->
+<section class="etap-section" id="section-tokyo">
+<div class="hcard hcard-b" style="margin-top:1rem">
+  <div class="ht">ETAPPE 1 · 8.–14. SEPTEMBER 2026 · 6 NÄCHTE</div>
+  <div class="hn">Hotel Blossom Hibiya · Tokio</div>
+  <div class="hd">Hibiya Park · ~1'002 CHF / 6 Nächte · höhere Etage mit Park-View anfragen</div>
+</div>
+<div class="map-wrap"><div id="map-tokyo" class="lmap"></div></div>
+<div class="tbar"><span class="tlabel">Anreise Tag 1</span><span class="ttext"><strong>09:05</strong> Narita → Narita Express Shibuya (~90 Min, ~13 CHF) → <strong>12:30</strong> Hotel → <strong>14:30</strong> Programm</span></div>
+
+<!-- Tag 1 -->
+<div class="day-card">
+  <div class="day-hdr">
+    <div class="day-num" style="background:#1A6BAA"><span class="d-tag">TAG</span><span class="d-n">1</span></div>
+    <div><div class="day-title">Shibuya – Ankunft &amp; erste Eindrücke</div><div class="day-sub">Di 8. Sep · Scramble · Sky · Parco Nintendo</div></div>
+  </div>
+  <div class="sbar"><span class="slabel">Zeitplan</span><span class="stext"><strong>14:30</strong> Scramble Crossing → <strong>15:30</strong> Hachiko → <strong>17:00</strong> Shibuya Sky (17 Uhr ideal!) → <strong>18:30</strong> Parco Nintendo → <strong>20:00</strong> Dinner</span></div>
+  <div class="slot"><div class="slot-hdr"><span class="slot-pill">NACHMITTAG · 14:30–19:00</span><div class="slot-line"></div></div>
+    <div class="act"><div class="act-name">Shibuya Scramble Crossing + Hachiko-Statue <span class="badge bm">Top Sight</span><span class="badge blp">LP</span></div><div class="act-note">Berühmteste Kreuzung der Welt · abends am stärksten · Hachiko 1 Min Fussweg</div><div class="act-price">Gratis</div></div>
+    <div class="act"><div class="act-name">Shibuya Sky Rooftop <span class="badge bm">Top Sight</span><span class="badge bcn">CN</span><span class="badge bto">TO</span></div><div class="act-note">360°-Aussicht · bei Klarsicht Fuji · 17 Uhr für Golden Hour · VORAB BUCHEN → shibuya-scramblesquare.com</div><div class="act-price">2'200 ¥ · ~13 CHF</div><div class="act-open">10:00–22:30 · VORAB BUCHEN!</div></div>
+    <div class="act"><div class="act-name">Shibuya Parco – Nintendo + Pokémon Center <span class="badge bart">Shopping</span><span class="badge bto">TO</span></div><div class="act-note">Nintendo Store + Pokémon Center auf 6 Etagen · kein gewöhnliches Kaufhaus · 5 Min Fussweg</div><div class="act-price">Gratis Eintritt · 10:00–21:00</div></div>
+    <div class="food-sec"><div class="food-hdr">DINNER – 3 VORSCHLÄGE</div><div class="food-opts">
+      <div class="food-opt"><span class="food-lbl" style="background:#1A6BAA;color:white">Empfehlung</span><div class="food-name">Narukiyo <span class="badge blp">LP</span><span class="badge bto">TO</span></div><div class="food-note">Kult-Izakaya · Wagyu, Sashimi · Wochen vorher reservieren!</div><div class="food-price">~47–70 CHF</div></div>
+      <div class="food-opt"><span class="food-lbl" style="background:#0D7A5F;color:white">Leicht/Jetlag</span><div class="food-name">Uobei Shibuya <span class="badge bto">TO</span></div><div class="food-note">Sushi auf Förderband · schnell, günstig · ideal nach Flugtag</div><div class="food-price">~9–12 CHF</div></div>
+      <div class="food-opt"><span class="food-lbl" style="background:#2E7D32;color:white">● IG</span><div class="food-name">Espresso D'Works <span class="badge big">IG @yonaeats</span></div><div class="food-note">Omurice Shibuya · entspannter Ankunftsabend</div><div class="food-price">~5–7 CHF</div></div>
+    </div></div>
+    <div class="tip">💡 Jetlag-Tipp: Bis 21–22 Uhr wach bleiben für bessere Akklimatisierung!</div>
+  </div>
+</div>
+
+<!-- Tag 2 -->
+<div class="day-card">
+  <div class="day-hdr">
+    <div class="day-num" style="background:#0D7A5F"><span class="d-tag">TAG</span><span class="d-n">2</span></div>
+    <div><div class="day-title">Harajuku, Omotesando &amp; Ginza</div><div class="day-sub">Mi 9. Sep · Meiji · Takeshita · Mipig · Bib Gourmand Dinner</div></div>
+  </div>
+  <div class="sbar"><span class="slabel">Zeitplan</span><span class="stext"><strong>07:30</strong> Meiji Schrein → <strong>09:30</strong> Takeshita → <strong>10:30</strong> Mipig Café → <strong>12:00</strong> Lunch → <strong>13:30</strong> Omotesando Hills → <strong>15:30</strong> Ginza Six + Fugetsudo → <strong>18:30</strong> Dinner</span></div>
+  <div class="slot"><div class="slot-hdr"><span class="slot-pill">MORGEN</span><div class="slot-line"></div></div>
+    <div class="act"><div class="act-name">Meiji Schrein <span class="badge bm">Top Sight</span><span class="badge blp">LP</span><span class="badge bmono">Monocle</span></div><div class="act-note">Vor 8 Uhr fast menschenleer · grösster hölzerner Torii Japans · Waldweg · ~45 Min · 15 Min Metro vom Hotel</div><div class="act-price">Gratis</div></div>
+    <div class="act"><div class="act-name">Takeshita Street <span class="badge bm">Top Sight</span><span class="badge blp">LP</span><span class="badge bto">TO</span></div><div class="act-note">J-Fashion-Zentrum Tokyos · Crepes, Cosplayer, schrille Mode · Xing Fu Tang Bubble Tea · 10 Min Fussweg von Meiji</div><div class="act-price">Gratis · Snacks ~2–5 CHF</div></div>
+    <div class="act"><div class="act-name">Mipig Café <span class="badge bge">Geheimtipp</span><span class="badge bcn">CN</span></div><div class="act-note">Mini-Schweinchen-Café · 4.9/5 · RESERVIERUNG ZWINGEND 1–2 Wochen vorher → mipig.cafe · 1–2 Min von Takeshita</div><div class="act-price">1'800–2'800 ¥ · ~11–16 CHF · 10:00–20:00</div></div>
+    <div class="food-sec"><div class="food-hdr">LUNCH – 3 VORSCHLÄGE</div><div class="food-opts">
+      <div class="food-opt"><span class="food-lbl" style="background:#2E7D32;color:white">● IG Empfehlung</span><div class="food-name">Menchirashi – Carbonara Udon <span class="badge big">IG @lizzys.munchies</span></div><div class="food-note">Carbonara Udon mit Guanciale &amp; Parmesan · virtuelle Schlange früh holen!</div><div class="food-price">~9–12 CHF</div></div>
+      <div class="food-opt"><span class="food-lbl" style="background:#6B6B68;color:white">Leicht</span><div class="food-name">Afuri Harajuku <span class="badge blp">LP</span><span class="badge bto">TO</span></div><div class="food-note">Yuzu-Ramen · leicht, frisch · Michelin Selected</div><div class="food-price">~7 CHF</div></div>
+      <div class="food-opt"><span class="food-lbl" style="background:#6B6B68;color:white">Budget</span><div class="food-name">Harajuku Gyozaro <span class="badge bto">TO</span></div><div class="food-note">Authentische Gyoza · schnell</div><div class="food-price">~6 CHF</div></div>
+    </div></div>
+  </div>
+  <div class="slot"><div class="slot-hdr"><span class="slot-pill">NACHMITTAG · 13:30–18:00</span><div class="slot-line"></div></div>
+    <div class="act"><div class="act-name">Omotesando Hills &amp; Cat Street <span class="badge bart">Kunst &amp; Design</span><span class="badge bcn">CN</span><span class="badge bmono">Monocle</span></div><div class="act-note">Tadao Ando-Architektur · eleganteste Flaniermeile Tokyos · Cat Street: Boutiquen, Vintage · ~1.5h · 10 Min Fussweg von Harajuku</div><div class="act-price">Gratis · 11:00–20:00</div></div>
+    <div class="act"><div class="act-name">Ginza Six + Fugetsudo <span class="badge bge">Geheimtipp</span><span class="badge bcn">CN</span></div><div class="act-note">Rooftop-Garten gratis · Ginza Tsutaya Books · Fugetsudo (1872): traditionelle Wagashi · 20 Min Metro von Omotesando</div><div class="act-price">Gratis · Wagashi ~3–9 CHF · 10:30–20:30</div></div>
+    <div class="food-sec"><div class="food-hdr">DINNER – 3 VORSCHLÄGE</div><div class="food-opts">
+      <div class="food-opt"><span class="food-lbl" style="background:#8B5010;color:white">Bib Gourmand</span><div class="food-name">Ginza Hachigo <span class="badge bbib">Bib</span><span class="badge bto">TO</span></div><div class="food-note">Ehem. Michelin-Stern · Consommé-Brühe · früh anstehen! Mi–So 11–16h</div><div class="food-price">~7–9 CHF</div></div>
+      <div class="food-opt"><span class="food-lbl" style="background:#C07000;color:white">★★ Upgrade</span><div class="food-name">Tempura Kondo <span class="badge bm2">★★</span></div><div class="food-note">2 Sterne seit 2008 · Reservierung: myconcierge-japan.com</div><div class="food-price">~88–118 CHF</div></div>
+      <div class="food-opt"><span class="food-lbl" style="background:#2E7D32;color:white">● IG</span><div class="food-name">Ginza Katsukami <span class="badge big">IG @kaifromjapan01</span></div><div class="food-note">Premium Tonkatsu Ginza</div><div class="food-price">~18–24 CHF</div></div>
+    </div></div>
+  </div>
+</div>
+
+<!-- Tag 3 -->
+<div class="day-card">
+  <div class="day-hdr">
+    <div class="day-num" style="background:#A03060"><span class="d-tag">TAG</span><span class="d-n">3</span></div>
+    <div><div class="day-title">Daikanyama, Nakameguro &amp; Azabudai Hills</div><div class="day-sub">Do 10. Sep · Tsutaya · Starbucks Roastery · TeamLab Borderless</div></div>
+  </div>
+  <div class="sbar"><span class="slabel">Zeitplan</span><span class="stext"><strong>09:00</strong> Daikanyama T-Site → <strong>10:30</strong> Nakameguro + Starbucks Roastery → <strong>12:30</strong> Lunch → <strong>14:00</strong> TeamLab Borderless (VORAB BUCHEN!) → <strong>17:30</strong> En Tea House → <strong>19:00</strong> Dinner</span></div>
+  <div class="slot"><div class="slot-hdr"><span class="slot-pill">GANZTAGS</span><div class="slot-line"></div></div>
+    <div class="act"><div class="act-name">Daikanyama T-Site (Tsutaya Books) <span class="badge bge">Geheimtipp</span><span class="badge bmono">Monocle</span><span class="badge bcn">Vogue</span></div><div class="act-note">3 kuratierte Buchgebäude · Anjin-Lounge · «Bibliothek im Wald» · 09:00–22:00 · 10 Min Taxi</div><div class="act-price">Gratis</div></div>
+    <div class="act"><div class="act-name">Nakameguro + Starbucks Reserve Roastery <span class="badge bge">Geheimtipp</span><span class="badge bcn">CN</span><span class="badge bto">TO</span></div><div class="act-note">Weltgrösster Starbucks (4 Stockwerke) · Kengo Kuma-Architektur · Tokyo-Spezialkaffees · 10 Min Fussweg von Daikanyama</div><div class="act-price">Kaffee ~5–12 CHF · 07:00–22:00</div></div>
+    <div class="food-sec"><div class="food-hdr">LUNCH – 3 VORSCHLÄGE</div><div class="food-opts">
+      <div class="food-opt"><span class="food-lbl" style="background:#8B5010;color:white">Bib Gourmand</span><div class="food-name">Iruca Tokyo <span class="badge bbib">Bib</span><span class="badge bto">TO</span></div><div class="food-note">Porcini-Truffle Ramen · 3x Bib in Folge · 30 Min vorher anstehen</div><div class="food-price">~11–13 CHF</div></div>
+      <div class="food-opt"><span class="food-lbl" style="background:#6B6B68;color:white">Lokal</span><div class="food-name">Gyoza Hohei <span class="badge blp">LP</span></div><div class="food-note">Kult-Gyoza · mehrfach ausgezeichnet</div><div class="food-price">~7 CHF</div></div>
+      <div class="food-opt"><span class="food-lbl" style="background:#0D7A5F;color:white">Food Hall</span><div class="food-name">Azabudai Hills Food Hall <span class="badge bcn">CN</span></div><div class="food-note">Direkt nach TeamLab · keine Fahrzeit</div><div class="food-price">~9–18 CHF</div></div>
+    </div></div>
+    <div class="act"><div class="act-name">TeamLab Borderless – Azabudai Hills <span class="badge bart">Kunst</span><span class="badge bcn">CN</span></div><div class="act-note">50 digitale Kunstinstallationen · keine feste Wegführung · 2–3h einplanen · VORAB BUCHEN → teamlab.art · 08:30–21:00</div><div class="act-price">~3'200 ¥ · ~19 CHF</div></div>
+    <div class="act"><div class="act-name">En Tea House (im Museum) <span class="badge bge">Geheimtipp</span><span class="badge bcn">CN</span></div><div class="act-note">Digitale Blüten im Teetäschchen · futuristischer Take auf Teezeremonie · direkt nach Borderless</div><div class="act-price">~4–7 CHF</div></div>
+    <div class="food-sec"><div class="food-hdr">DINNER – 3 VORSCHLÄGE</div><div class="food-opts">
+      <div class="food-opt"><span class="food-lbl" style="background:#8B5010;color:white">Bib Gourmand</span><div class="food-name">Iruca Tokyo (abends) <span class="badge bbib">Bib</span></div><div class="food-note">Falls mittags nicht gemacht</div><div class="food-price">~11–13 CHF</div></div>
+      <div class="food-opt"><span class="food-lbl" style="background:#6B6B68;color:white">Lokal</span><div class="food-name">Roppongi Izakaya <span class="badge bto">TO</span></div><div class="food-note">Lokale Gassen rund um Roppongi</div><div class="food-price">~12–21 CHF</div></div>
+      <div class="food-opt"><span class="food-lbl" style="background:#2E7D32;color:white">● IG</span><div class="food-name">Ginza Torishige <span class="badge big">IG @kaifromjapan01</span></div><div class="food-note">Premium-Yakitori Ginza · IG Top-Empfehlung</div><div class="food-price">~18–29 CHF</div></div>
+    </div></div>
+  </div>
+</div>
+
+<!-- Tag 4 -->
+<div class="day-card">
+  <div class="day-hdr">
+    <div class="day-num" style="background:#8B5010"><span class="d-tag">TAG</span><span class="d-n">4</span></div>
+    <div><div class="day-title">Asakusa, Ueno &amp; Akihabara</div><div class="day-sub">Fr 11. Sep · Sensoji VOR 8 UHR · Bib Lunch · Skytree · Dawn Robot Café</div></div>
+  </div>
+  <div class="sbar"><span class="slabel">Zeitplan</span><span class="stext"><strong>07:30</strong> Sensoji (VOR 8 UHR!) → <strong>08:30</strong> Kagetsudo Snack → <strong>10:30</strong> Yadoroku Lunch (Bib) → <strong>12:00</strong> Ameyoko + Museum → <strong>17:00</strong> Skytree (17 Uhr!) → <strong>19:30</strong> Dawn Robot Café + Akihabara → <strong>21:00</strong> Dinner</span></div>
+  <div class="warn">⚠️ VOR 8 UHR an Sensoji sein! Ab 9 Uhr Touristengruppen aus ganz Asien.</div>
+  <div class="slot"><div class="slot-hdr"><span class="slot-pill">MORGEN VOR 8 UHR</span><div class="slot-line"></div></div>
+    <div class="act"><div class="act-name">Sensoji Tempel + Nakamise-dori <span class="badge bm">Top Sight</span><span class="badge blp">LP</span><span class="badge bcn">CN</span></div><div class="act-note">Tokios ältester Tempel · 24h offen · Dango + Sweet Potato Ice · Transfer: Asakusa 25 Min Metro</div><div class="act-price">Gratis</div></div>
+    <div class="act"><div class="act-name">Asakusa Kagetsudo – Melon-Pan Snack <span class="badge bge">Geheimtipp</span><span class="badge big">IG @aidenandma</span></div><div class="act-note">IG: «favourite sweet of the whole trip» · direkt bei Sensoji · 09:00–17:00</div><div class="act-price">~2–3 CHF</div></div>
+    <div class="food-sec"><div class="food-hdr">LUNCH – 3 VORSCHLÄGE</div><div class="food-opts">
+      <div class="food-opt"><span class="food-lbl" style="background:#8B5010;color:white">Bib Gourmand</span><div class="food-name">Onigiri Yadoroku <span class="badge bbib">Bib</span></div><div class="food-note">Ältestes Onigiri-Restaurant Tokyos (seit 1954) · 11:30–14:00</div><div class="food-price">~4–5 CHF</div></div>
+      <div class="food-opt"><span class="food-lbl" style="background:#6B6B68;color:white">Klassisch</span><div class="food-name">Daikokuya Tempura <span class="badge blp">LP</span></div><div class="food-note">Sehr beliebt · Warteschlange einplanen</div><div class="food-price">~12 CHF</div></div>
+      <div class="food-opt"><span class="food-lbl" style="background:#4A4845;color:white">Ikonisch</span><div class="food-name">Ichiran Ramen <span class="badge bto">TO</span></div><div class="food-note">Tonkotsu in Einzelkabinen · einmal machen!</div><div class="food-price">~8 CHF</div></div>
+    </div></div>
+  </div>
+  <div class="slot"><div class="slot-hdr"><span class="slot-pill">NACHMITTAG &amp; ABEND</span><div class="slot-line"></div></div>
+    <div class="act"><div class="act-name">Ameyoko Market + Tokyo National Museum <span class="badge bart">Kunst</span><span class="badge blp">LP</span></div><div class="act-note">Markt: Streetfood, Fisch, Gewürze · Museum: Samurai-Rüstungen, Keramik · 09:30–17:00 · 15 Min Metro</div><div class="act-price">Markt gratis · Museum ~6 CHF</div></div>
+    <div class="act"><div class="act-name">Tokyo Skytree – 17:00 Slot! <span class="badge bm">Top Sight</span><span class="badge blp">LP</span></div><div class="act-note">634m · Golden Hour dann Nacht · VORAB BUCHEN → tokyo-skytree.jp</div><div class="act-price">~12 CHF · VORAB BUCHEN!</div></div>
+    <div class="act"><div class="act-name">Dawn Avatar Robot Café + Akihabara <span class="badge bge">Geheimtipp</span><span class="badge bto">TO</span></div><div class="act-note">Roboter ferngesteuert von Menschen mit Behinderungen · FIX BUCHEN! → dabar.jp · danach Neonlichter Akihabara</div><div class="act-price">Robot Café ~9 CHF</div></div>
+    <div class="food-sec"><div class="food-hdr">DINNER – 3 VORSCHLÄGE</div><div class="food-opts">
+      <div class="food-opt"><span class="food-lbl" style="background:#5B50C8;color:white">Einzigartig</span><div class="food-name">Maid Café Maidreamin</div><div class="food-note">Einmal machen · 1–2 Tage vorher reservieren</div><div class="food-price">~15–21 CHF</div></div>
+      <div class="food-opt"><span class="food-lbl" style="background:#4A4845;color:white">Lokal</span><div class="food-name">Ichiran Ramen Akihabara <span class="badge bto">TO</span></div><div class="food-note">Tonkotsu · Einzelkabinen</div><div class="food-price">~8 CHF</div></div>
+      <div class="food-opt"><span class="food-lbl" style="background:#2E7D32;color:white">● IG</span><div class="food-name">Tonkatsu Butagumi <span class="badge big">IG @kaifromjapan01</span></div><div class="food-note">Tabelog Top-Tonkatsu Tokyo</div><div class="food-price">~15–21 CHF</div></div>
+    </div></div>
+  </div>
+</div>
+
+<!-- Tag 5 -->
+<div class="day-card">
+  <div class="day-hdr">
+    <div class="day-num" style="background:#5B50C8"><span class="d-tag">TAG</span><span class="d-n">5</span></div>
+    <div><div class="day-title">Shinjuku &amp; Ikebukuro</div><div class="day-sub">Sa 12. Sep · Gyoen · GRATIS-Plattform · 1-Stern Lunch (5 CHF!) · Golden Gai</div></div>
+  </div>
+  <div class="warn">⚠️ Shinjuku Gyoen MO + DO GESCHLOSSEN! Wochentag vorab prüfen!</div>
+  <div class="sbar"><span class="slabel">Zeitplan</span><span class="stext"><strong>09:00</strong> Shinjuku Gyoen → <strong>10:30</strong> Met. Gov. Building (GRATIS!) → <strong>11:30</strong> Nakajima Lunch (★, 5 CHF!) → <strong>13:30</strong> Ikebukuro Pokémon Center → <strong>15:00</strong> MarioKart Tour → <strong>20:00</strong> Omoide Yokocho → <strong>21:30</strong> Golden Gai</span></div>
+  <div class="slot"><div class="slot-hdr"><span class="slot-pill">GANZTAGS</span><div class="slot-line"></div></div>
+    <div class="act"><div class="act-name">Shinjuku Gyoen Park <span class="badge bm">Top Sight</span><span class="badge blp">LP</span></div><div class="act-note">Ruhiger Kontrastmoment · 3 Garten-Stile · September herbstliche Stimmung · ⚠️ Mo + Do geschlossen!</div><div class="act-price">500 ¥ · ~3 CHF · 09:00–18:00</div></div>
+    <div class="act"><div class="act-name">Tokyo Met. Gov. Building – GRATIS Aussichtsplattform <span class="badge bge">Geheimtipp</span><span class="badge blp">LP</span><span class="badge bto">TO</span></div><div class="act-note">202m · Fuji-Blick · Guinness-Rekord Projektion-Mapping nachts · Norddeck Mo zu, Süddeck Di zu</div><div class="act-price">GRATIS! · 09:30–17:00</div></div>
+    <div class="food-sec"><div class="food-hdr">LUNCH – 3 VORSCHLÄGE</div><div class="food-opts">
+      <div class="food-opt"><span class="food-lbl" style="background:#B8860B;color:white">★ Michelin-Stern!</span><div class="food-name">Shinjuku Kappo Nakajima <span class="badge bm1">★</span></div><div class="food-note">Günstigster Michelin-1-Stern Tokyos! Schlange vor 11:30 Uhr</div><div class="food-price">~5 CHF (!)</div></div>
+      <div class="food-opt"><span class="food-lbl" style="background:#0D7A5F;color:white">Gesellig</span><div class="food-name">Nabezo Shinjuku <span class="badge bto">TO</span></div><div class="food-note">Shabu-Shabu Buffet · ideal für zwei</div><div class="food-price">~24 CHF</div></div>
+      <div class="food-opt"><span class="food-lbl" style="background:#2E7D32;color:white">● IG</span><div class="food-name">Menchirashi Carbonara Udon <span class="badge big">IG @lizzys.munchies</span></div><div class="food-note">Falls auf Tag 2 nicht gemacht</div><div class="food-price">~9–12 CHF</div></div>
+    </div></div>
+    <div class="act"><div class="act-name">Ikebukuro Sunshine City + Pokémon Center <span class="badge bm">Top Sight</span></div><div class="act-note">Grösstes Pokémon Center Japans · 10 Min Metro von Shinjuku</div><div class="act-price">Gratis Eintritt</div></div>
+    <div class="act"><div class="act-name">MarioKart Go-Kart Tour <span class="badge bge">Geheimtipp</span><span class="badge bcn">CN</span></div><div class="act-note">In Kostümen durch Shinjuku · VORAB BUCHEN 2–3 Wochen · Internationaler Führerschein zwingend!</div><div class="act-price">~47–70 CHF p.P.</div></div>
+    <div class="act"><div class="act-name">Omoide Yokocho + Golden Gai + Zoetrope Bar <span class="badge bnight">Abend</span><span class="badge blp">LP</span><span class="badge bcn">CN</span></div><div class="act-note">Yakitori in 50er-Gassen · 200+ Winzigbars · weltbeste japanische Whisky-Sammlung bei Zoetrope</div><div class="act-price">Yakitori ~5–9 CHF · Drinks ~5–12 CHF</div></div>
+    <div class="food-sec"><div class="food-hdr">DINNER / ABENDSNACKS – 3 VORSCHLÄGE</div><div class="food-opts">
+      <div class="food-opt"><span class="food-lbl" style="background:#1A6BAA;color:white">Empfehlung</span><div class="food-name">Yakitori Omoide Yokocho <span class="badge blp">LP</span></div><div class="food-note">Grill-Spiesse direkt in der Gasse</div><div class="food-price">~5–9 CHF</div></div>
+      <div class="food-opt"><span class="food-lbl" style="background:#C0392B;color:white">Ramen</span><div class="food-name">Ramen Nagi Golden Gai <span class="badge bto">TO</span></div><div class="food-note">Kultstatus direkt im Viertel</div><div class="food-price">~7 CHF</div></div>
+      <div class="food-opt"><span class="food-lbl" style="background:#8B5010;color:white">Bib Gourmand</span><div class="food-name">Konjiki-Hototogisu <span class="badge bbib">Bib</span><span class="badge big">IG</span></div><div class="food-note">Ehem. Michelin-Stern · Pork-Clam-Brühe</div><div class="food-price">~9–12 CHF</div></div>
+    </div></div>
+  </div>
+</div>
+
+<!-- Tag 6 -->
+<div class="day-card">
+  <div class="day-hdr">
+    <div class="day-num" style="background:#B0263A"><span class="d-tag">TAG</span><span class="d-n">6</span></div>
+    <div><div class="day-title">Kichijoji &amp; Abschluss-Dinner Ginza</div><div class="day-sub">So 13. Sep · Inokashira Park · Vintage · 1-Stern Dinner</div></div>
+  </div>
+  <div class="sbar"><span class="slabel">Zeitplan</span><span class="stext"><strong>09:30</strong> Inokashira Park (Bootsfahrt!) → <strong>11:00</strong> Kichijoji Vintage → <strong>12:30</strong> Lunch → <strong>15:30</strong> Ginza → <strong>19:00</strong> Abschluss-Dinner</span></div>
+  <div class="slot"><div class="slot-hdr"><span class="slot-pill">GANZTAGS</span><div class="slot-line"></div></div>
+    <div class="act"><div class="act-name">Inokashira Park + Kichijoji <span class="badge bge">Geheimtipp</span><span class="badge bcn">CN</span><span class="badge bmono">Monocle</span></div><div class="act-note">Tokyos beliebtestes Wohnviertel · Bootsfahrt auf dem Teich · Vintage-Shops · Harmonica Yokocho · 35 Min Keio-Linie von Shinjuku</div><div class="act-price">Park ~1 CHF · Boot ~4 CHF</div></div>
+    <div class="food-sec"><div class="food-hdr">LUNCH – 3 VORSCHLÄGE</div><div class="food-opts">
+      <div class="food-opt"><span class="food-lbl" style="background:#1A6BAA;color:white">Empfehlung</span><div class="food-name">Café Lumiere – Kakigori <span class="badge bcn">CN</span></div><div class="food-note">Bestes Kakigori Kichijojis</div><div class="food-price">~5–9 CHF</div></div>
+      <div class="food-opt"><span class="food-lbl" style="background:#6B6B68;color:white">Lokal</span><div class="food-name">Harmonica Yokocho <span class="badge bcn">CN</span></div><div class="food-note">Winzige Yokocho-Gasse</div><div class="food-price">~6–12 CHF</div></div>
+      <div class="food-opt"><span class="food-lbl" style="background:#2E7D32;color:white">● IG</span><div class="food-name">Maccha House <span class="badge big">IG @aidenandma</span></div><div class="food-note">Matcha-Spezialitäten</div><div class="food-price">~5–9 CHF</div></div>
+    </div></div>
+    <div class="act"><div class="act-name">Ginza – Letzter Einkauf + Spaziergang <span class="badge bart">Shopping</span></div><div class="act-note">Fugetsudo nochmals · Souvenirs · Ginza abends beleuchtet · 40 Min Metro</div><div class="act-price">Gratis</div></div>
+    <div class="food-sec"><div class="food-hdr">ABSCHLUSS-DINNER – 3 VORSCHLÄGE</div><div class="food-opts">
+      <div class="food-opt"><span class="food-lbl" style="background:#B8860B;color:white">★ Michelin</span><div class="food-name">Sasuga Ginza <span class="badge bm1">★</span></div><div class="food-note">100% Buchweizen-Soba · kein Marathon-Omakase · elegant</div><div class="food-price">~6–9 CHF (Michelin!)</div></div>
+      <div class="food-opt"><span class="food-lbl" style="background:#C07000;color:white">★★ Grosser Abschluss</span><div class="food-name">Tempura Kondo <span class="badge bm2">★★</span></div><div class="food-note">Falls auf Tag 2 nicht gemacht</div><div class="food-price">~88–118 CHF</div></div>
+      <div class="food-opt"><span class="food-lbl" style="background:#2E7D32;color:white">● IG</span><div class="food-name">Kamo to Negi (Enten-Lauch Ramen) <span class="badge big">IG @kaifromjapan01</span></div><div class="food-note">Elegante Brühe · einzigartiger Stil</div><div class="food-price">~7–9 CHF</div></div>
+    </div></div>
+  </div>
+</div>
+
+<div class="tbar"><span class="tlabel">Weiterreise</span><span class="ttext"><strong>14. Sep:</strong> Hotel → Shinjuku (15 Min Metro) → Odakyu Romance Car → Hakone-Yumoto · 85 Min · ~14 CHF · SITZPLATZ VORAB RESERVIEREN!</span></div>
+
+<div class="cl-sec">
+  <div class="cl-hdr"><h2>Buchungs-Checkliste Tokio</h2></div>
+  <div class="cl-body">
+    <div class="cl-group"><div class="cl-gt">SOFORT BUCHEN</div>
+      <div class="cl-item"><div class="cb" onclick="this.classList.toggle('checked')"></div><div><strong>Narukiyo Shibuya</strong> – Wochen/Monate vorher reservieren</div></div>
+      <div class="cl-item"><div class="cb" onclick="this.classList.toggle('checked')"></div><div><strong>Tempura Kondo ★★</strong> – myconcierge-japan.com · Monate vorher ausgebucht</div></div>
+      <div class="cl-item"><div class="cb" onclick="this.classList.toggle('checked')"></div><div><strong>MarioKart Go-Kart Tour</strong> – 2–3 Wochen · Internationaler Führerschein!</div></div>
+    </div>
+    <div class="cl-group"><div class="cl-gt">1–2 WOCHEN VORHER</div>
+      <div class="cl-item"><div class="cb" onclick="this.classList.toggle('checked')"></div><div><strong>Mipig Café</strong> – mipig.cafe</div></div>
+      <div class="cl-item"><div class="cb" onclick="this.classList.toggle('checked')"></div><div><strong>Shibuya Sky</strong> – shibuya-scramblesquare.com · 17:00 Slot!</div></div>
+      <div class="cl-item"><div class="cb" onclick="this.classList.toggle('checked')"></div><div><strong>Tokyo Skytree</strong> – tokyo-skytree.jp · 17:00 Slot!</div></div>
+      <div class="cl-item"><div class="cb" onclick="this.classList.toggle('checked')"></div><div><strong>TeamLab Borderless</strong> – teamlab.art</div></div>
+      <div class="cl-item"><div class="cb" onclick="this.classList.toggle('checked')"></div><div><strong>Dawn Avatar Robot Café</strong> – dabar.jp</div></div>
+    </div>
+    <div class="cl-group"><div class="cl-gt">⚠️ WICHTIG</div>
+      <div class="cl-item"><div class="cb" onclick="this.classList.toggle('checked')"></div><div>Shinjuku Gyoen: <strong>MO + DO GESCHLOSSEN!</strong></div></div>
+      <div class="cl-item"><div class="cb" onclick="this.classList.toggle('checked')"></div><div>Ginza Hachigo: kein Reservierungssystem → ab 09:00 Ticket holen</div></div>
+      <div class="cl-item"><div class="cb" onclick="this.classList.toggle('checked')"></div><div>Nakajima ★: Schlange vor 11:30 Uhr · ~5 CHF Michelin!</div></div>
+      <div class="cl-item"><div class="cb" onclick="this.classList.toggle('checked')"></div><div>Odakyu Romance Car: Sitzplatz vorab reservieren</div></div>
+    </div>
+  </div>
+</div>
+</section>
+
+<!-- ═══════════════════ HAKONE ═══════════════════ -->
+<section class="etap-section" id="section-hakone">
+<div class="hcard hcard-g" style="margin-top:1rem">
+  <div class="ht">ETAPPE 2 · 14.–16. SEPTEMBER 2026 · 2 NÄCHTE</div>
+  <div class="hn">Matsuzakaya Honten Ryokan – Shiranso Pavillon · Ashinoyu, Hakone</div>
+  <div class="hd">4.6/5 · Privates Freiluft-Onsen · Kaiseki 2x inkl. · 📞 0460-83-6511 · rsv.matsuzakaya@kinnotake-resorts.jp<br>Erdgeschoss-Zimmer Shiranso mit privatem Freiluft-Onsen beim Check-in anfragen!</div>
+</div>
+<div class="map-wrap"><div id="map-hakone" class="lmap"></div></div>
+
+<div class="day-card">
+  <div class="day-hdr">
+    <div class="day-num" style="background:#0D7A5F"><span class="d-tag">TAG</span><span class="d-n">7</span></div>
+    <div><div class="day-title">Anreise &amp; Amazake-Teehaus</div><div class="day-sub">So 14. Sep · Tokio → Hakone · Onsen · 1. Kaiseki</div></div>
+  </div>
+  <div class="sbar"><span class="slabel">Anreise</span><span class="stext"><strong>10:00</strong> Shinjuku → Odakyu Romance Car (~85 Min, ~14 CHF, VORAB RESERVIEREN!) → <strong>11:30</strong> Hakone-Yumoto → Transfer → <strong>13:00</strong> Check-in Ryokan → <strong>14:30</strong> Amazake-chaya → <strong>16:30</strong> Onsen → <strong>18:00</strong> 1. Kaiseki</span></div>
+  <div class="slot"><div class="slot-hdr"><span class="slot-pill">TRANSFER OPTIONEN</span><div class="slot-line"></div></div>
+    <div class="act"><div class="act-name">Hakone-Yumoto → Ryokan – 3 Optionen</div>
+    <div class="act-note">
+      🚕 <strong>Taxi</strong> ~25 Min · ~¥4'000–5'000 (~24–30 CHF) · flexibel, empfohlen<br>
+      🚗 <strong>Hotel-Limousine</strong> ~25 Min · ¥8'800 (~52 CHF) · mind. 3 Tage vorher per E-Mail buchen<br>
+      🚌 <strong>Bus Linie H</strong> Richtung Hakonemachi Port · Halt Higashi-ashinoyu · im Hakone Freepass inkl.
+    </div></div>
+  </div>
+  <div class="slot"><div class="slot-hdr"><span class="slot-pill">NACHMITTAG · 14:30–18:00</span><div class="slot-line"></div></div>
+    <div class="act"><div class="act-name">Amazake-chaya Teehaus <span class="badge bge">Geheimtipp</span><span class="badge blp">LP</span></div><div class="act-note">400 Jahre alt · 13 Generationen · Tōkaidō-Pilgerweg · Holzhütte mit Feuerstelle · Amazake (warmes Reisgetränk) + Mochi-Spiesse · 10 Min Fussweg vom Ryokan</div><div class="act-price">~3–6 CHF</div><div class="act-open">⚠️ NUR BARGELD · 07:00–17:30</div></div>
+    <div class="act"><div class="act-name">Erstes Onsen + 1. Kaiseki-Dinner (inkl.) <span class="badge bry">Onsen</span></div><div class="act-note">Privates Freiluft-Onsen im Zimmer (Erdgeschoss-Shiranso) · Dinner ab 18:00 · 11–14 Gänge saisonale Küche</div><div class="act-price">Im Zimmerpreis inkl.</div></div>
+  </div>
+</div>
+
+<div class="day-card">
+  <div class="day-hdr">
+    <div class="day-num" style="background:#0D7A5F"><span class="d-tag">TAG</span><span class="d-n">8</span></div>
+    <div><div class="day-title">Owakudani, Hakone-jinja &amp; Lake Ashi</div><div class="day-sub">Mo 15. Sep · Hakone Freepass · Vulkan · Torii · Onsen-Marathon</div></div>
+  </div>
+  <div class="sbar"><span class="slabel">Zeitplan</span><span class="stext"><strong>09:30</strong> Owakudani (~25 Min Bus) → <strong>11:30</strong> Seilbahn → Schiff → Hakone-jinja → <strong>13:00</strong> Salon de Thé Rosage Lunch → <strong>14:30</strong> Bus → Ryokan → <strong>14:30–18:00</strong> Onsen-Marathon → <strong>18:00</strong> 2. Kaiseki</span></div>
+  <div class="tip">💡 Hakone Freepass (~¥6'100 · ~36 CHF) kaufen – deckt Bus, Tozan-Bahn, Seilbahn, Lake Ashi-Schiff. Owakudani-Seilbahn bei starkem Wind geschlossen → Bus-Fallback einplanen!</div>
+  <div class="slot"><div class="slot-hdr"><span class="slot-pill">GANZTAGS</span><div class="slot-line"></div></div>
+    <div class="act"><div class="act-name">Owakudani – Vulkankrater &amp; Kuro-Tamago <span class="badge bm">Top Sight</span><span class="badge blp">LP</span><span class="badge bcn">CN</span></div><div class="act-note">«Great Boiling Valley» · schwefelige Dämpfe · schwarze Eier (1 Ei = 7 Jahre länger leben!) · Seilbahn mit Fuji-Blick · Transfer: ~25 Min Bus vom Ryokan</div><div class="act-price">Eintritt gratis · Eier ~3 CHF · 09:00–16:20</div></div>
+    <div class="act"><div class="act-name">Hakone-jinja + Heiwa-no-Torii <span class="badge bm">Top Sight</span><span class="badge blp">LP</span><span class="badge bcn">CN</span></div><div class="act-note">Rotes Torii im Wasser von Lake Ashi · ikonisches Fotomotiv · Fuji-Blick · Transfer: Seilbahn → Tōgendai → Schiff (~30 Min, im Freepass)</div><div class="act-price">Gratis · 24h</div></div>
+    <div class="food-sec"><div class="food-hdr">LUNCH – 3 VORSCHLÄGE</div><div class="food-opts">
+      <div class="food-opt"><span class="food-lbl" style="background:#1A6BAA;color:white">Empfehlung</span><div class="food-name">Salon de Thé Rosage <span class="badge blp">LP</span></div><div class="food-note">Lake-Ashi-Terrasse · Apfelkuchen + Omurice · 5 Min Fussweg vom Schrein</div><div class="food-price">~12–18 CHF · 10:00–16:00</div></div>
+      <div class="food-opt"><span class="food-lbl" style="background:#6B6B68;color:white">Lokal</span><div class="food-name">Hatsuhana Soba Honten <span class="badge blp">LP</span></div><div class="food-note">Handgemachte Soba · Hakones Soba-Legende</div><div class="food-price">~9–12 CHF</div></div>
+      <div class="food-opt"><span class="food-lbl" style="background:#6B6B68;color:white">Schnell</span><div class="food-name">Owakudani Eki-Restaurant</div><div class="food-note">Ramen mit schwarzem Ei · direkt bei Seilbahnstation</div><div class="food-price">~7–11 CHF</div></div>
+    </div></div>
+    <div class="act"><div class="act-name">Onsen-Marathon + 2. Kaiseki (inkl.) <span class="badge bry">Onsen</span></div><div class="act-note">5 buchbare Privat-Onsen · Yukata, Tee, Bücherecke · Transfer: ~30 Min Bus Linie H zurück · Dinner ab 18:00 · September-Menü: Pilze, Edamame, Herbstfisch</div><div class="act-price">Im Zimmerpreis inkl.</div></div>
+  </div>
+</div>
+
+<div class="day-card">
+  <div class="day-hdr">
+    <div class="day-num" style="background:#9A5C10"><span class="d-tag">TAG</span><span class="d-n">9</span></div>
+    <div><div class="day-title">Open-Air Museum &amp; Weiterreise nach Kyoto</div><div class="day-sub">Di 16. Sep · Picasso-Pavillon · Bella Foresta · Shinkansen</div></div>
+  </div>
+  <div class="sbar"><span class="slabel">Zeitplan</span><span class="stext"><strong>09:00</strong> Open-Air Museum (~20 Min Bus) → <strong>11:30</strong> Bella Foresta Lunch → <strong>13:00</strong> Check-out → <strong>13:30</strong> Transfer → Odawara (~40 Min) → <strong>14:45</strong> Shinkansen → <strong>~16:35</strong> Kyoto</span></div>
+  <div class="slot"><div class="slot-hdr"><span class="slot-pill">MORGEN · 09:00–12:30</span><div class="slot-line"></div></div>
+    <div class="act"><div class="act-name">Hakone Open-Air Museum + Picasso-Pavillon <span class="badge bm">Top Sight</span><span class="badge bart">Kunst</span><span class="badge blp">LP</span><span class="badge bcn">CN</span></div><div class="act-note">Japans erstes Open-Air-Skulpturenmuseum · Henry Moore, Rodin, Miró · Picasso-Pavillon: 319 Werke! · Forest Footbath · ~2h · Tickets online vorbuchen (September-Hochsaison!)</div><div class="act-price">¥1'600 · ~9.50 CHF · 09:00–17:00</div></div>
+    <div class="food-sec"><div class="food-hdr">LUNCH VOR ABREISE – 3 VORSCHLÄGE</div><div class="food-opts">
+      <div class="food-opt"><span class="food-lbl" style="background:#1A6BAA;color:white">Empfehlung</span><div class="food-name">Bella Foresta (im Museum) <span class="badge blp">LP</span></div><div class="food-note">Buffet direkt im Museum · keine Fahrzeit</div><div class="food-price">~13 CHF</div></div>
+      <div class="food-opt"><span class="food-lbl" style="background:#6B6B68;color:white">Coffee</span><div class="food-name">Coffee Camp (Gora) <span class="badge blp">LP</span></div><div class="food-note">English-speaking Baristas · Single-Origin · 5 Min Fahrt</div><div class="food-price">~4–7 CHF</div></div>
+      <div class="food-opt"><span class="food-lbl" style="background:#6B6B68;color:white">Tradition</span><div class="food-name">NARAYA CAFE <span class="badge bcn">CN</span></div><div class="food-note">In ehemaligem Ryokan · Manju + Footbath</div><div class="food-price">~5–9 CHF</div></div>
+    </div></div>
+  </div>
+  <div class="tbar"><span class="tlabel">Abreise nach Kyoto</span><span class="ttext"><strong>13:00</strong> Taxi/Limousine → Odawara (~40 Min, ¥6'000–12'300) → <strong>14:45</strong> Shinkansen Hikari/Nozomi → Kyoto · 1h50 · ~¥13'200 (~78 CHF) → <strong>~16:35</strong> Kyoto Station → Keihan U-Bahn → Hotel Alza (~20 Min)</span></div>
+</div>
+
+<div class="cl-sec">
+  <div class="cl-hdr"><h2>Buchungs-Checkliste Hakone</h2></div>
+  <div class="cl-body">
+    <div class="cl-group"><div class="cl-gt">BUCHEN</div>
+      <div class="cl-item"><div class="cb" onclick="this.classList.toggle('checked')"></div><div><strong>Odakyu Romance Car</strong> Shinjuku → Hakone: Sitzplatz vorab reservieren</div></div>
+      <div class="cl-item"><div class="cb" onclick="this.classList.toggle('checked')"></div><div><strong>Hakone Freepass</strong> (~¥6'100): am Shinjuku oder Hakone-Yumoto kaufen</div></div>
+      <div class="cl-item"><div class="cb" onclick="this.classList.toggle('checked')"></div><div><strong>Hotel-Limousine</strong> Yumoto → Ryokan (¥8'800): mind. 3 Tage vorher per E-Mail</div></div>
+      <div class="cl-item"><div class="cb" onclick="this.classList.toggle('checked')"></div><div><strong>Ryokan</strong>: Erdgeschoss-Shiranso mit Freiluft-Onsen anfragen! rsv.matsuzakaya@kinnotake-resorts.jp</div></div>
+      <div class="cl-item"><div class="cb" onclick="this.classList.toggle('checked')"></div><div><strong>Open-Air Museum</strong>: Tickets online vorbuchen</div></div>
+      <div class="cl-item"><div class="cb" onclick="this.classList.toggle('checked')"></div><div><strong>Hotel-Limousine</strong> Ryokan → Odawara (¥12'300): bei Check-in bestätigen</div></div>
+      <div class="cl-item"><div class="cb" onclick="this.classList.toggle('checked')"></div><div><strong>Shinkansen</strong> Odawara → Kyoto: reservierter Sitz</div></div>
+      <div class="cl-item"><div class="cb" onclick="this.classList.toggle('checked')"></div><div>⚠️ Amazake-chaya: <strong>NUR BARGELD</strong> · offen bis 17:30!</div></div>
+    </div>
+  </div>
+</div>
+</section>
+
+<!-- ═══════════════════ KYOTO / OSAKA ═══════════════════ -->
+<section class="etap-section" id="section-kyoto">
+<div class="hcard hcard-p" style="margin-top:1rem">
+  <div class="ht">ETAPPE 3 · 16.–19. SEPTEMBER 2026 · 3 NÄCHTE</div>
+  <div class="hn">Hotel Alza Kyoto · Gion · Kamo River</div>
+  <div class="hd">33 Benzaitencho, Higashiyama Ward · Michelin 2 Pavilions · 4.7/5 · <strong>NUR 18 ZIMMER – SOFORT BUCHEN!</strong><br>📞 +81 75-561-1033 · hotel-alza.jp · River-View Balkon-Zimmer anfragen · Bento-Frühstück ¥2'860</div>
+</div>
+<div class="map-wrap"><div id="map-kyoto" class="lmap"></div></div>
+
+<!-- Tag 9 Abend -->
+<div class="day-card">
+  <div class="day-hdr">
+    <div class="day-num" style="background:#A03060"><span class="d-tag">TAG</span><span class="d-n">9</span></div>
+    <div><div class="day-title">Ankunft Kyoto &amp; Gion Abend</div><div class="day-sub">Mi 16. Sep Abend · direkt in Gion eintauchen</div></div>
+  </div>
+  <div class="sbar"><span class="slabel">Zeitplan</span><span class="stext"><strong>~16:35</strong> Kyoto Station → Keihan → Hotel Alza (2 Min von Sanjo Station) → <strong>17:00</strong> Check-in → <strong>17:30</strong> Gion Hanamikoji → <strong>18:00</strong> Shirakawa-Kanal → <strong>19:00</strong> Dinner Pontocho</span></div>
+  <div class="slot"><div class="slot-hdr"><span class="slot-pill">ABEND · 17:30–21:00</span><div class="slot-line"></div></div>
+    <div class="act"><div class="act-name">Gion Hanamikoji Street <span class="badge bm">Top Sight</span><span class="badge blp">LP</span><span class="badge bcn">CN</span></div><div class="act-note">Schönste Strasse Japans · BESTE Maiko-Sichtungen täglich 17:30–18:30 · 3 Min Fussweg vom Hotel</div><div class="act-price">Gratis</div></div>
+    <div class="act"><div class="act-name">Shirakawa-Kanal &amp; Tatsumi-Brücke <span class="badge bge">Geheimtipp</span><span class="badge bmono">Monocle</span></div><div class="act-note">Kyotos schönster Kanal · Weidenbäume, Laternen · Postkartenmotiv bei Nacht · 2 Min vom Hotel</div><div class="act-price">Gratis</div></div>
+    <div class="act"><div class="act-name">Gion Tsujiri – Matcha-Stop <span class="badge bge">Geheimtipp</span><span class="badge big">IG</span></div><div class="act-note">IG: bester Matcha-Stop Kyotos · Matcha-Parfait, Matcha-Latte · direkt in Gion</div><div class="act-price">~4–7 CHF · 11:00–20:00</div></div>
+    <div class="food-sec"><div class="food-hdr">DINNER – 3 VORSCHLÄGE</div><div class="food-opts">
+      <div class="food-opt"><span class="food-lbl" style="background:#1A6BAA;color:white">Empfehlung</span><div class="food-name">Pontocho Alley <span class="badge bm">Top Sight</span><span class="badge blp">LP</span></div><div class="food-note">Kyotos bekannteste Restaurantgasse · Noryo-yuka-Terrassen über dem Kamo River · 5 Min Fussweg</div><div class="food-price">Izakaya ~2'000–3'500 ¥</div></div>
+      <div class="food-opt"><span class="food-lbl" style="background:#C07000;color:white">★★ Upgrade</span><div class="food-name">Roan Kikunoi <span class="badge bm2">★★</span><span class="badge blp">LP</span></div><div class="food-note">Schwesterrestaurant Kikunoi Honten ★★★ · modernes Kaiseki · Reservierung!</div><div class="food-price">~70–120 CHF</div></div>
+      <div class="food-opt"><span class="food-lbl" style="background:#6B6B68;color:white">Lokal</span><div class="food-name">Guilo Guilo Hitoshina <span class="badge blp">LP</span></div><div class="food-note">LP: «delicious kaiseki at ridiculously affordable prices»</div><div class="food-price">~30–47 CHF</div></div>
+    </div></div>
+  </div>
+</div>
+
+<!-- Tag 10 -->
+<div class="day-card">
+  <div class="day-hdr">
+    <div class="day-num" style="background:#A03060"><span class="d-tag">TAG</span><span class="d-n">10</span></div>
+    <div><div class="day-title">Kyoto Klassiker</div><div class="day-sub">Do 17. Sep · Fushimi Inari · Nishiki · Sanjusangendo · Kiyomizudera</div></div>
+  </div>
+  <div class="warn">⚠️ FUSHIMI INARI VOR 7 UHR! September Sunrise ~05:40 Uhr. Ab 8 Uhr überlaufen.</div>
+  <div class="sbar"><span class="slabel">Zeitplan</span><span class="stext"><strong>06:30</strong> Fushimi Inari (Keihan, 12 Min) → <strong>09:00</strong> Zurück + Frühstück → <strong>10:00</strong> Nishiki Market → <strong>11:30</strong> Sanjusangendo (Bus 12 Min) → <strong>14:30</strong> Kiyomizudera → <strong>16:00</strong> Sannenzaka → <strong>18:00</strong> Dinner</span></div>
+  <div class="slot"><div class="slot-hdr"><span class="slot-pill">06:30 – VOR 7 UHR!</span><div class="slot-line"></div></div>
+    <div class="act"><div class="act-name">Fushimi Inari Taisha – VOR 7 UHR! <span class="badge bm">Top Sight</span><span class="badge blp">LP</span><span class="badge bcn">CN</span><span class="badge bmono">Monocle</span></div><div class="act-note">5'000+ rote Torii-Tore · vor 7 Uhr fast keine Touristen · bis Yotsutsuji-Aussichtspunkt ~40 Min · Transfer: Keihan ab Sanjo 2 Min Fussweg vom Hotel, 12 Min bis Fushimi Inari</div><div class="act-price">Gratis · 24h offen</div></div>
+  </div>
+  <div class="slot"><div class="slot-hdr"><span class="slot-pill">10:00 – NISHIKI MARKET</span><div class="slot-line"></div></div>
+    <div class="act"><div class="act-name">Nishiki Market – «Kyotos Küche» <span class="badge bm">Top Sight</span><span class="badge blp">LP</span><span class="badge bcn">CN</span></div><div class="act-note">100+ Stände auf 400m · Matcha-Eis, Tofu-Donuts, Yakitori · Transfer: 13 Min Fussweg vom Hotel</div><div class="act-price">Gratis · Snacks ~200–800 ¥</div></div>
+    <div class="food-sec"><div class="food-hdr">LUNCH – 3 VORSCHLÄGE</div><div class="food-opts">
+      <div class="food-opt"><span class="food-lbl" style="background:#1A6BAA;color:white">Empfehlung</span><div class="food-name">Nishiki Market Streetfood <span class="badge blp">LP</span><span class="badge bcn">CN</span></div><div class="food-note">Durch den Markt essen · Tamagoyaki, Matcha-Eis, Pickles</div><div class="food-price">~1'500–2'500 ¥</div></div>
+      <div class="food-opt"><span class="food-lbl" style="background:#6B6B68;color:white">Sit-down</span><div class="food-name">Gyoza Hohei <span class="badge blp">LP</span><span class="badge bto">TO</span></div><div class="food-note">LP: «you might even see a local maiko»</div><div class="food-price">~7 CHF</div></div>
+      <div class="food-opt"><span class="food-lbl" style="background:#2E7D32;color:white">● IG</span><div class="food-name">Amato Maeda – Dango Parfait <span class="badge big">IG</span></div><div class="food-note">Schönstes Süsses Kyotos laut IG</div><div class="food-price">~800–1'200 ¥</div></div>
+    </div></div>
+    <div class="act"><div class="act-name">Sanjusangendo – 1'001 goldene Kannon-Statuen <span class="badge bm">Top Sight</span><span class="badge blp">LP</span><span class="badge bcn">CN</span></div><div class="act-note">120m Tempel · lebensgrosse goldene Statuen · Fotografieren verboten · intensivste Erfahrung Kyotos · Bus ~12 Min von Nishiki</div><div class="act-price">600 ¥ · ~3.50 CHF · 08:30–17:00</div></div>
+    <div class="act"><div class="act-name">Kiyomizudera + Sannenzaka &amp; Ninenzaka <span class="badge bm">Top Sight</span><span class="badge blp">LP</span><span class="badge bcn">CN</span></div><div class="act-note">Auf Stelzen über dem Hügel · bestes Licht nachmittags · Hokan-ji Pagode Fotospot · Transfer: 20 Min Fussweg oder Bus 10 Min</div><div class="act-price">500 ¥ · ~3 CHF · 06:00–18:00</div></div>
+    <div class="food-sec"><div class="food-hdr">DINNER – 3 VORSCHLÄGE</div><div class="food-opts">
+      <div class="food-opt"><span class="food-lbl" style="background:#2E7D32;color:white">● IG Empfehlung</span><div class="food-name">Yakitori Mokkei <span class="badge big">IG @osaka_gourmet</span><span class="badge bto">TO</span></div><div class="food-note">IG Top-Yakitori Kyoto · Binchotan-Holzkohle</div><div class="food-price">~18–29 CHF</div></div>
+      <div class="food-opt"><span class="food-lbl" style="background:#C07000;color:white">★★ Upgrade</span><div class="food-name">Gion Maruyama <span class="badge bm2">★★</span></div><div class="food-note">2-Stern-Kaiseki · September-Menü: Pilze, Fisch · Reservierung zwingend!</div><div class="food-price">~106–176 CHF</div></div>
+      <div class="food-opt"><span class="food-lbl" style="background:#6B6B68;color:white">Lokal</span><div class="food-name">Pontocho Izumoya <span class="badge blp">LP</span></div><div class="food-note">100 Jahre alt · LP: «deliciously tender and smoky»</div><div class="food-price">~3'000–5'000 ¥</div></div>
+    </div></div>
+  </div>
+</div>
+
+<!-- Tag 11 -->
+<div class="day-card">
+  <div class="day-hdr">
+    <div class="day-num" style="background:#A03060"><span class="d-tag">TAG</span><span class="d-n">11</span></div>
+    <div><div class="day-title">Arashiyama früh + Osaka Tagesausflug</div><div class="day-sub">Fr 18. Sep · Bamboo VOR 7 UHR · Kinkaku-ji · Osaka Neon</div></div>
+  </div>
+  <div class="warn">⚠️ ARASHIYAMA BAMBOO GROVE VOR 7 UHR! Ab 9 Uhr extrem überlaufen.</div>
+  <div class="sbar"><span class="slabel">Zeitplan</span><span class="stext"><strong>06:30</strong> Arashiyama (Bus 35 Min) → <strong>08:30</strong> Tenryu-ji → <strong>09:30</strong> % Arabica → <strong>10:30</strong> Kinkaku-ji (Bus ~25 Min) → <strong>12:30</strong> Kyoto Station → <strong>13:00</strong> JR → Osaka (~28 Min) → <strong>13:30–22:00</strong> Osaka-Ausflug → <strong>22:30</strong> Rückfahrt Kyoto</span></div>
+  <div class="slot"><div class="slot-hdr"><span class="slot-pill">06:30 – KYOTO · VOR 7 UHR</span><div class="slot-line"></div></div>
+    <div class="act"><div class="act-name">Arashiyama Bamboo Grove – VOR 7 UHR! <span class="badge bm">Top Sight</span><span class="badge blp">LP</span><span class="badge bcn">CN</span></div><div class="act-note">Magisch leer vor 7 Uhr · 20m hohe Bambusstiele · Transfer: Bus 28 direkt vom Hotel, 35 Min</div><div class="act-price">Gratis · 24h offen</div></div>
+    <div class="act"><div class="act-name">Tenryu-ji Garten <span class="badge bm">Top Sight</span><span class="badge blp">LP</span><span class="badge bcn">CN</span></div><div class="act-note">UNESCO-Welterbe · Sogen-Teich reflektiert Bergkulisse · Korridor führt direkt in Bambuswald</div><div class="act-price">800 ¥ · ~5 CHF · ab 08:30</div></div>
+    <div class="act"><div class="act-name">% Arabica Coffee Arashiyama <span class="badge bge">Geheimtipp</span><span class="badge bcn">CN</span></div><div class="act-note">CN-Top-Pick · direkt am Hozu-Fluss mit Bergblick · meistfotografierter Coffee Shop Kyotos</div><div class="act-price">~4–5 CHF</div></div>
+    <div class="act"><div class="act-name">Kinkaku-ji – Goldener Pavillon <span class="badge bm">Top Sight</span><span class="badge blp">LP</span><span class="badge bcn">CN</span></div><div class="act-note">Blattgold · Spiegelteich · bei Öffnung ruhiger · 30 Min reicht · Transfer: Bus 59 ~25 Min</div><div class="act-price">500 ¥ · ~3 CHF · 09:00–17:00</div></div>
+  </div>
+  <div class="slot"><div class="slot-hdr"><span class="slot-pill">13:30–22:30 · OSAKA</span><div class="slot-line"></div></div>
+    <div class="osaka-bar"><strong>Osaka Tagesausflug:</strong> JR Kyoto → Namba ~28 Min · ¥580 (~3.50 CHF) · Letzter Zug zurück ~23:00</div>
+    <div class="act"><div class="act-name">Kuromon Ichiba Market <span class="badge bm">Top Sight</span><span class="badge blp">LP</span><span class="badge bos">Osaka</span></div><div class="act-note">150 Stände · Thunfisch auf Stäbchen, Jakobsmuscheln gegrillt · 5 Min von Namba</div><div class="act-price">Gratis · ⚠️ bis 18:00!</div></div>
+    <div class="act"><div class="act-name">Shitennoji Tempel <span class="badge bm">Top Sight</span><span class="badge bos">Osaka</span></div><div class="act-note">Ältester offizieller Tempel Japans (593 n.Chr.) · Marash-Empfehlung · 15 Min Metro von Namba</div><div class="act-price">300 ¥ · ⚠️ Schliessung 16:30!</div></div>
+    <div class="act"><div class="act-name">Shinsekai + Tsutenkaku Tower <span class="badge bm">Top Sight</span><span class="badge blp">LP</span><span class="badge bos">Osaka</span></div><div class="act-note">Retro-Viertel · Kushikatsu (⚠️ NIEMALS doppelt in die Sauce!) · Yaekatsu für lokales Kushikatsu · Tower ~1'500 ¥</div><div class="act-price">Kushikatsu ~100–200 ¥/Spiess</div></div>
+    <div class="act"><div class="act-name">Dotonbori – Neon &amp; Glico-Mann <span class="badge bm">Top Sight</span><span class="badge blp">LP</span><span class="badge bcn">CN</span><span class="badge bos">Osaka</span></div><div class="act-note">Ikonische Neon-Reklamen · Glico Running Man · Takoyaki bei Kukuru · Tombori River Cruise optional (~1'200 ¥) · abends am stärksten</div><div class="act-price">Takoyaki ~500–800 ¥</div></div>
+    <div class="food-sec"><div class="food-hdr">OSAKA ESSEN &amp; SNACKS – IG + KLASSIKER</div><div class="food-opts">
+      <div class="food-opt"><span class="food-lbl" style="background:#2E7D32;color:white">● IG Lunch</span><div class="food-name">Wagyu Idaten <span class="badge big">IG @osaka_gourmet</span></div><div class="food-note">Wagyu Rice Bowl · IG Top-Empfehlung Osaka</div><div class="food-price">~2'500–3'500 ¥</div></div>
+      <div class="food-opt"><span class="food-lbl" style="background:#2E7D32;color:white">● IG Alternative</span><div class="food-name">Mugito Mensuke <span class="badge big">IG @osaka_gourmet</span></div><div class="food-note">Tabelog No.1 Ramen Osaka!</div><div class="food-price">~1'200–1'800 ¥</div></div>
+      <div class="food-opt"><span class="food-lbl" style="background:#6B6B68;color:white">Mitbringsel</span><div class="food-name">Rikuro Ojisan Cheesecake <span class="badge big">IG</span></div><div class="food-note">Frisch aus dem Ofen · Dotonbori-Nähe</div><div class="food-price">~900 ¥</div></div>
+    </div></div>
+  </div>
+</div>
+
+<!-- Tag 12 -->
+<div class="day-card">
+  <div class="day-hdr">
+    <div class="day-num" style="background:#A03060"><span class="d-tag">TAG</span><span class="d-n">12</span></div>
+    <div><div class="day-title">Abreise nach Ishigaki</div><div class="day-sub">Sa 19. Sep · Nishiki · Haruka Express · Kansai Airport</div></div>
+  </div>
+  <div class="sbar"><span class="slabel">Zeitplan</span><span class="stext"><strong>08:00</strong> Bento-Frühstück → <strong>09:00</strong> Nishiki Market letzte Mitbringsel → <strong>10:00</strong> Check-out → <strong>10:30</strong> Haruka Express Kyoto → Kansai Airport (~75 Min, ~¥3'800) → <strong>11:45</strong> Kansai Airport → Abflug Ishigaki (~2h20)</span></div>
+</div>
+
+<div class="cl-sec">
+  <div class="cl-hdr"><h2>Buchungs-Checkliste Kyoto / Osaka</h2></div>
+  <div class="cl-body">
+    <div class="cl-group"><div class="cl-gt">SOFORT</div>
+      <div class="cl-item"><div class="cb" onclick="this.classList.toggle('checked')"></div><div><strong>Hotel Alza Kyoto</strong> – NUR 18 ZIMMER! hotel-alza.jp · +81 75-561-1033 · River-View Balkon anfragen</div></div>
+      <div class="cl-item"><div class="cb" onclick="this.classList.toggle('checked')"></div><div><strong>Roan Kikunoi ★★</strong> – Reservierung via Website oder Hotel Concierge</div></div>
+      <div class="cl-item"><div class="cb" onclick="this.classList.toggle('checked')"></div><div><strong>Gion Maruyama ★★</strong> – Reservierung zwingend!</div></div>
+      <div class="cl-item"><div class="cb" onclick="this.classList.toggle('checked')"></div><div><strong>Haruka Express</strong> Kyoto → Kansai Airport: Ticket kaufen</div></div>
+    </div>
+    <div class="cl-group"><div class="cl-gt">⚠️ WICHTIG</div>
+      <div class="cl-item"><div class="cb" onclick="this.classList.toggle('checked')"></div><div>Fushimi Inari + Arashiyama Bamboo: <strong>VOR 7 UHR!</strong></div></div>
+      <div class="cl-item"><div class="cb" onclick="this.classList.toggle('checked')"></div><div>Shitennoji Osaka: Schliessung <strong>16:30!</strong></div></div>
+      <div class="cl-item"><div class="cb" onclick="this.classList.toggle('checked')"></div><div>Kuromon Market Osaka: schliesst <strong>18:00!</strong></div></div>
+      <div class="cl-item"><div class="cb" onclick="this.classList.toggle('checked')"></div><div>Kushikatsu Osaka: <strong>NIEMALS doppelt in die Sauce!</strong></div></div>
+    </div>
+  </div>
+</div>
+</section>
+
+<!-- ═══════════════════ ISHIGAKI ═══════════════════ -->
+<section class="etap-section" id="section-ishigaki">
+<div class="hcard hcard-a" style="margin-top:1rem">
+  <div class="ht">ETAPPE 4 · 19.–24. SEPTEMBER 2026 · 5 NÄCHTE ALL-INCLUSIVE</div>
+  <div class="hn">Club Med Kabira Ishigaki ⭐ 4.6/5</div>
+  <div class="hd">Kabira Peninsula · UNESCO-Küste · 📞 +81 980-84-4600 · clubmed.com/kabc<br>All-Inclusive: Mahlzeiten, Getränke inkl. Wein/Bier, 32+ Aktivitäten, Shows</div>
+</div>
+<div class="map-wrap"><div id="map-ishigaki" class="lmap"></div></div>
+<div class="included-box"><strong>Inkludiert:</strong> Windsurfen · Kajak · SUP · Schnorcheln ab Strand · Yoga (Sunrise/Sunset) · Flying Trapeze (Apr–Nov ✓) · Tennis · Beachvolleyball · Sanshin-Workshop · Okinawa-Tanzworkshop · Abendshows · Alle Mahlzeiten + Drinks<br><em>Zusatzkosten: Manta-Tauchen/Schnorcheln · Kabira Bay Glasbodenboot · Spa · Mietauto</em></div>
+<div class="warn" style="margin:0 4rem .8rem">⚠️ September–Oktober ist Taifun-Saison. Club Med bietet immer Indoor-Alternativen bei Schlechtwetter.</div>
+
+<!-- Tag 12 Ankunft -->
+<div class="day-card">
+  <div class="day-hdr">
+    <div class="day-num" style="background:#C07000"><span class="d-tag">TAG</span><span class="d-n">12</span></div>
+    <div><div class="day-title">Ankunft &amp; erste Erkundung</div><div class="day-sub">Sa 19. Sep · Kansai → Ishigaki · Strand · Sunset</div></div>
+  </div>
+  <div class="tbar"><span class="tlabel">Anreise</span><span class="ttext">Kansai Airport → Ishigaki Painushima Airport · ~2h20 Direktflug (ANA/JAL) · Check-in 15:00 · Transfer: Taxi/Resort-Transfer ~30 Min (~¥6'000)</span></div>
+  <div class="slot"><div class="slot-hdr"><span class="slot-pill">ANKUNFT</span><div class="slot-line"></div></div>
+    <div class="act"><div class="act-name">Strand &amp; Schnorcheln ab Resort <span class="badge bincl">Inkludiert</span></div><div class="act-note">Korallenriff beginnt wenige Meter vom Ufer · Equipment (Maske, Schnorchel, Flossen) gratis leihen</div></div>
+    <div class="act"><div class="act-name">White Pearl Beach Club Sunset + Dinner <span class="badge bincl">Inkludiert</span></div><div class="act-note">Bohemian-Stil · Live Sanshin (traditionelle Okinawa-Laute) zum Sonnenuntergang · Buffet inkl. Ishigaki-Wagyu, Okinawa-Spezialitäten · Wein &amp; Bier inkl.</div></div>
+  </div>
+</div>
+
+<!-- Tag 13 -->
+<div class="day-card">
+  <div class="day-hdr">
+    <div class="day-num" style="background:#C07000"><span class="d-tag">TAG</span><span class="d-n">13</span></div>
+    <div><div class="day-title">Manta Scramble &amp; Kabira Bay</div><div class="day-sub">So 20. Sep · September = BESTE Manta-Saison!</div></div>
+  </div>
+  <div class="slot"><div class="slot-hdr"><span class="slot-pill">GANZTAGS</span><div class="slot-line"></div></div>
+    <div class="act"><div class="act-name">Manta Scramble – Tauchen oder Schnorcheln <span class="badge bm">Top Sight</span></div><div class="act-note">Weltberühmtes Manta-Revier direkt vor dem Resort · Sept–Nov beste Saison! Bis 20 Manta Rays möglich · 1 Tag vorher am Excursion Desk buchen.<br>Alternative: <strong>Viking Scuba Kabira</strong> (4.9/5!) direkt neben Resort – englischsprachig, kleinere Gruppen, Unterwasser-Fotos inkl. → vikingscubakabira.com</div><div class="act-price">Schnorcheln ~¥3'000–5'000 · Tauchen ~¥8'000–15'000</div></div>
+    <div class="act"><div class="act-name">Kabira Bay – Glasbodenboot <span class="badge bm">Top Sight</span><span class="badge blp">LP</span></div><div class="act-note">«Japans schönste Bucht» · Schildkröten, Rifffische, Korallen · 10 Min Fahrt · Schwimmen verboten (Perlenzucht)</div><div class="act-price">~¥1'200–2'000 · kabiramarine.jp · 09:00–17:00</div></div>
+    <div class="act"><div class="act-name">Flying Trapeze + Pool <span class="badge bincl">Inkludiert</span></div><div class="act-note">Ikonisch für Club Med · Instructor-geführt · bis November verfügbar ✓ · Aqua Fitness, Beachvolleyball</div></div>
+  </div>
+</div>
+
+<!-- Tag 14 -->
+<div class="day-card">
+  <div class="day-hdr">
+    <div class="day-num" style="background:#C07000"><span class="d-tag">TAG</span><span class="d-n">14</span></div>
+    <div><div class="day-title">Inselrundfahrt</div><div class="day-sub">Mo 21. Sep · Yonehara · Leuchtturm · Stargazing</div></div>
+  </div>
+  <div class="tbar"><span class="tlabel">Tipp</span><span class="ttext">Mietauto empfohlen (~¥4'000–6'000 für den Tag) · Bus-Netz auf Ishigaki limitiert</span></div>
+  <div class="slot"><div class="slot-hdr"><span class="slot-pill">GANZTAGS</span><div class="slot-line"></div></div>
+    <div class="act"><div class="act-name">Yonehara Beach – Bestes Schnorcheln der Insel <span class="badge bm">Top Sight</span><span class="badge blp">LP Top-Pick</span></div><div class="act-note">LP: «Best snorkeling on Ishigaki» · Schildkröten, Seeschlangen, Tropenfische direkt ab Ufer · flaches Wasser · 20 Min Fahrt · beste Zeit vor 11:00</div><div class="act-price">Gratis · Equipment ~¥500</div></div>
+    <div class="act"><div class="act-name">Cape Hirakubo – Nördlichste Spitze Ishigakis <span class="badge bm">Top Sight</span></div><div class="act-note">Weisser Leuchtturm · 360°-Blick auf Pazifik und Ostchinesisches Meer gleichzeitig · 5 Min Fussweg vom Parkplatz · ~45 Min vom Resort</div><div class="act-price">Gratis</div></div>
+    <div class="food-sec"><div class="food-hdr">LUNCH OFF-RESORT – 3 VORSCHLÄGE</div><div class="food-opts">
+      <div class="food-opt"><span class="food-lbl" style="background:#1A6BAA;color:white">Empfehlung</span><div class="food-name">Ishigaki Wagyu</div><div class="food-note">Rivalisiert mit Kobe-Beef · Yakiniku oder Steak · die Insel hat 35'000 Rinder!</div><div class="food-price">~18–35 CHF</div></div>
+      <div class="food-opt"><span class="food-lbl" style="background:#6B6B68;color:white">Traditionell</span><div class="food-name">Yaeyama Soba <span class="badge blp">LP</span></div><div class="food-note">Lokale Nudeln · Ishigakis Soul Food · LP Must-Try</div><div class="food-price">~5–7 CHF</div></div>
+      <div class="food-opt"><span class="food-lbl" style="background:#6B6B68;color:white">Süss</span><div class="food-name">Beni-Imo Snacks</div><div class="food-note">Lila Süsskartoffel · Okinawa-Spezialität · als Mitbringsel!</div><div class="food-price">~300–500 ¥</div></div>
+    </div></div>
+    <div class="act"><div class="act-name">Stargazing Abend <span class="badge bge">Geheimtipp</span></div><div class="act-note">International Dark Sky Park · 84 von 88 Sternbildern · Milchstrasse mit blossem Auge · September ausgezeichnet · Guided Tour ~¥3'000 oder am Strand liegen</div><div class="act-price">Gratis am Strand</div></div>
+  </div>
+</div>
+
+<!-- Tag 15 -->
+<div class="day-card">
+  <div class="day-hdr">
+    <div class="day-num" style="background:#C07000"><span class="d-tag">TAG</span><span class="d-n">15</span></div>
+    <div><div class="day-title">Taketomi Island + Resort</div><div class="day-sub">Di 22. Sep · Ryukyu-Dorf · Büffelkart · Sanshin-Abend</div></div>
+  </div>
+  <div class="slot"><div class="slot-hdr"><span class="slot-pill">GANZTAGS</span><div class="slot-line"></div></div>
+    <div class="act"><div class="act-name">Taketomi Island Tagesausflug <span class="badge bm">Top Sight</span><span class="badge blp">LP</span></div><div class="act-note">15 Min Fähre · Ryukyu-Dorf aus dem 17. Jh. · Büffelkart-Tour (Sanshin-Musik vom Fahrer!) · Kaiji Beach Sternchensand · LP: «steps back in time» · Transfer: ~25 Min Taxi zum Port</div><div class="act-price">Fähre ~¥1'500 Hin&amp;Zurück · Büffelkart ~¥1'200</div></div>
+    <div class="act"><div class="act-name">Sanshin-Workshop + Awamori-Verkostung <span class="badge bincl">Inkludiert</span></div><div class="act-note">Traditionelles Okinawa-Instrument lernen · Awamori-Reisschnaps (stärker als Sake) gegen kleinen Aufpreis</div></div>
+  </div>
+</div>
+
+<!-- Tag 16 Abreise -->
+<div class="day-card">
+  <div class="day-hdr">
+    <div class="day-num" style="background:#444440"><span class="d-tag">TAG</span><span class="d-n">16</span></div>
+    <div><div class="day-title">Letzter Morgen &amp; Abreise nach Tokio</div><div class="day-sub">Mi 24. Sep · Yoga · Frühstück · Abflug</div></div>
+  </div>
+  <div class="sbar"><span class="slabel">Abreise</span><span class="stext">Check-out 10:00 · Taxi/Transfer ~30 Min → Flughafen · Abflug Ishigaki → Tokio Haneda (~2h20) · Ankunft ~17:30 · 1 Nacht Tokio empfohlen!</span></div>
+  <div class="slot"><div class="slot-hdr"><span class="slot-pill">MORGEN · 07:00–10:00</span><div class="slot-line"></div></div>
+    <div class="act"><div class="act-name">Sunrise-Yoga + Morgen-Schnorcheln <span class="badge bincl">Inkludiert</span></div><div class="act-note">Letzte Yoga-Session am Strand · abschliessendes Schnorchel-Bad · Buffet bis 10:00 Uhr</div></div>
+  </div>
+</div>
+
+<div class="cl-sec">
+  <div class="cl-hdr"><h2>Buchungs-Checkliste Ishigaki</h2></div>
+  <div class="cl-body">
+    <div class="cl-group"><div class="cl-gt">BUCHEN</div>
+      <div class="cl-item"><div class="cb" onclick="this.classList.toggle('checked')"></div><div><strong>Flug Kansai → Ishigaki</strong>: ANA oder JAL</div></div>
+      <div class="cl-item"><div class="cb" onclick="this.classList.toggle('checked')"></div><div><strong>Flug Ishigaki → Tokio Haneda</strong>: 24. Sep</div></div>
+      <div class="cl-item"><div class="cb" onclick="this.classList.toggle('checked')"></div><div><strong>Manta Schnorcheln/Tauchen</strong>: Excursion Desk 1 Tag vorher · September = BESTE Saison!</div></div>
+      <div class="cl-item"><div class="cb" onclick="this.classList.toggle('checked')"></div><div><strong>Mietauto Tag 14</strong>: am Flughafen oder Resort anfragen · ~¥4'000–6'000</div></div>
+    </div>
+  </div>
+</div>
+</section>
+
+<!-- ═══════════════════ RÜCKREISE & INFOS ═══════════════════ -->
+<section class="etap-section" id="section-info" style="padding:1rem 0">
+
+<div class="info-card" style="margin-top:1rem">
+  <h3>Rückreise · 24.–25. September</h3>
+  <div class="route-opt rec" style="margin:0 0 8px">
+    <div class="route-label">Empfehlung: 1 Nacht Tokio – Club Med Empfehlung via Tokio ✓</div>
+    <div class="route-detail"><strong>Mi 24. Sep:</strong> Ishigaki → Tokio Haneda (~2h20) · Ankunft ~17:30 · 1 Nacht Tokio (Hotel Blossom Hibiya anfragen) · Abend Ginza Abschluss-Dinner<br><strong>Do 25. Sep:</strong> Tokio Narita → Zürich ZRH · Swiss Direktflug · Abflug ~11:00–13:00 · Ankunft ZRH ~16:00–18:00</div>
+    <div class="route-note">Kein Verbindungsstress · ausgeruhter Abflug · Taipeh/Hongkong schlechter oder nicht möglich</div>
+  </div>
+  <div class="route-opt" style="margin:0 0 8px">
+    <div class="route-label">Option 2: Gleicher Tag (riskant)</div>
+    <div class="route-detail"><strong>Mi 24. Sep früh:</strong> Früherer Flug Ishigaki → Tokio Haneda · min. 3–4h Puffer · Transfer Haneda → Narita (~90 Min) · Abendflug Narita → Zürich</div>
+    <div class="route-note">Riskant bei Taifun-bedingten Verspätungen · nicht empfohlen</div>
+  </div>
+</div>
+
+<div class="info-card">
+  <h3>Abschluss-Dinner Letzte Nacht Tokio</h3>
+  <div class="food-sec" style="margin:0">
+    <div class="food-hdr">3 VORSCHLÄGE</div>
+    <div class="food-opts">
+      <div class="food-opt"><span class="food-lbl" style="background:#B8860B;color:white">★ Michelin</span><div class="food-name">Sasuga Ginza ★</div><div class="food-note">Soba · elegant · kein Marathon-Omakase</div><div class="food-price">~6–9 CHF (Michelin!)</div></div>
+      <div class="food-opt"><span class="food-lbl" style="background:#C07000;color:white">★★ Grosser Abschluss</span><div class="food-name">Tempura Kondo ★★</div><div class="food-note">Falls noch nicht gemacht · myconcierge-japan.com</div><div class="food-price">~88–118 CHF</div></div>
+      <div class="food-opt"><span class="food-lbl" style="background:#2E7D32;color:white">● IG</span><div class="food-name">Kamo to Negi (Enten-Lauch Ramen)</div><div class="food-note">Elegante Brühe · einzigartiger Stil</div><div class="food-price">~7–9 CHF</div></div>
+    </div>
+  </div>
+</div>
+
+<div class="info-card">
+  <h3>Gesamt-Buchungs-Checkliste · Priorisiert</h3>
+  <div style="display:grid;grid-template-columns:1fr 1fr;gap:1rem">
+  <div>
+    <div class="cl-group"><div class="cl-gt">SOFORT BUCHEN (ausgebucht im Sept.!)</div>
+      <div class="cl-item"><div class="cb" onclick="this.classList.toggle('checked')"></div><div><strong>Hotel Alza Kyoto</strong> – NUR 18 Zimmer! hotel-alza.jp</div></div>
+      <div class="cl-item"><div class="cb" onclick="this.classList.toggle('checked')"></div><div><strong>Narukiyo Shibuya</strong> – Wochen vorher</div></div>
+      <div class="cl-item"><div class="cb" onclick="this.classList.toggle('checked')"></div><div><strong>Tempura Kondo ★★</strong> – myconcierge-japan.com</div></div>
+      <div class="cl-item"><div class="cb" onclick="this.classList.toggle('checked')"></div><div><strong>MarioKart Tour</strong> – 2–3 Wochen · Intl. Führerschein!</div></div>
+      <div class="cl-item"><div class="cb" onclick="this.classList.toggle('checked')"></div><div><strong>Hakone Ryokan</strong> – rsv.matsuzakaya@kinnotake-resorts.jp</div></div>
+      <div class="cl-item"><div class="cb" onclick="this.classList.toggle('checked')"></div><div><strong>Roan Kikunoi ★★</strong> – Reservierung zwingend</div></div>
+    </div>
+  </div>
+  <div>
+    <div class="cl-group"><div class="cl-gt">1–2 WOCHEN VORHER</div>
+      <div class="cl-item"><div class="cb" onclick="this.classList.toggle('checked')"></div><div>Mipig Café – mipig.cafe</div></div>
+      <div class="cl-item"><div class="cb" onclick="this.classList.toggle('checked')"></div><div>Shibuya Sky · Tokyo Skytree · TeamLab · Robot Café</div></div>
+      <div class="cl-item"><div class="cb" onclick="this.classList.toggle('checked')"></div><div>Hakone Open-Air Museum online vorbuchen</div></div>
+      <div class="cl-item"><div class="cb" onclick="this.classList.toggle('checked')"></div><div>Odakyu Romance Car + Shinkansen + Flüge</div></div>
+      <div class="cl-item"><div class="cb" onclick="this.classList.toggle('checked')"></div><div>Swiss Direktflug Narita → Zürich ZRH · 25. Sep</div></div>
+      <div class="cl-item"><div class="cb" onclick="this.classList.toggle('checked')"></div><div>Hotel letzte Nacht Tokio (24. Sep)</div></div>
+    </div>
+    <div class="cl-group"><div class="cl-gt">⚠️ NEVER FORGET</div>
+      <div class="cl-item"><div class="cb" onclick="this.classList.toggle('checked')"></div><div>Shinjuku Gyoen: <strong>MO + DO GESCHLOSSEN!</strong></div></div>
+      <div class="cl-item"><div class="cb" onclick="this.classList.toggle('checked')"></div><div>Fushimi Inari + Arashiyama: <strong>VOR 7 UHR!</strong></div></div>
+      <div class="cl-item"><div class="cb" onclick="this.classList.toggle('checked')"></div><div>Shitennoji Osaka: Schliessung <strong>16:30!</strong></div></div>
+      <div class="cl-item"><div class="cb" onclick="this.classList.toggle('checked')"></div><div>Amazake-chaya Hakone: <strong>NUR BARGELD!</strong></div></div>
+    </div>
+  </div>
+  </div>
+</div>
+</section>
+
+<footer>
+  <strong>Japan Reiseplan 2026 · 8.–25. September · 17 Nächte</strong><br>
+  Tokio · Hakone · Kyoto · Osaka · Ishigaki · Rückreise via Tokio nach Zürich<br>
+  Quellen: Condé Nast Traveller · Lonely Planet · Time Out · Monocle · Vogue · Michelin Guide · Instagram<br>
+  Alle CHF-Preise sind Richtwerte (1 CHF ≈ 170 ¥)
+</footer>
+
+<script>
+// NAVIGATION
+function showE(name) {
+  document.querySelectorAll('.etap-section').forEach(s => s.classList.remove('visible'));
+  document.querySelectorAll('.etap-btn').forEach(b => b.classList.remove('active'));
+  const sec = document.getElementById('section-' + name);
+  if (sec) sec.classList.add('visible');
+  const btn = document.querySelector('[data-e="' + name + '"]');
+  if (btn) { btn.classList.add('active'); btn.scrollIntoView({behavior:'smooth',block:'nearest',inline:'center'}); }
+  window.scrollTo({top:0,behavior:'smooth'});
+  setTimeout(() => initMap(name), 150);
+}
+
+// MAPS
+const mapsInit = {};
+const MC = {'tokyo':'#1A6BAA','hakone':'#0D7A5F','kyoto':'#A03060','ishigaki':'#C07000'};
+
+const stops = {
+  tokyo: { id:'map-tokyo', c:[35.685,139.740], z:12, pts:[
+    {p:[35.659,139.701],n:'1',t:'Scramble Crossing',d:'Tag 1 · 14:30'},
+    {p:[35.676,139.699],n:'2',t:'Meiji Schrein',d:'Tag 2 · 07:30'},
+    {p:[35.667,139.709],n:'3',t:'Omotesando Hills',d:'Tag 2 · 13:30'},
+    {p:[35.670,139.764],n:'4',t:'Ginza Six',d:'Tag 2 · 15:30'},
+    {p:[35.649,139.700],n:'5',t:'Daikanyama T-Site',d:'Tag 3 · 09:00'},
+    {p:[35.649,139.693],n:'6',t:'Starbucks Roastery',d:'Tag 3 · 10:30'},
+    {p:[35.662,139.743],n:'7',t:'TeamLab Borderless',d:'Tag 3 · 14:00'},
+    {p:[35.715,139.797],n:'8',t:'Sensoji Tempel',d:'Tag 4 · 07:30'},
+    {p:[35.710,139.811],n:'9',t:'Tokyo Skytree',d:'Tag 4 · 17:00'},
+    {p:[35.685,139.710],n:'10',t:'Shinjuku Gyoen',d:'Tag 5 · 09:00'},
+    {p:[35.693,139.700],n:'11',t:'Omoide Yokocho',d:'Tag 5 · 20:00'},
+    {p:[35.700,139.574],n:'12',t:'Inokashira Park',d:'Tag 6 · 09:30'}
+  ]},
+  hakone: { id:'map-hakone', c:[35.22,139.04], z:11, pts:[
+    {p:[35.222,139.042],n:'1',t:'Matsuzakaya Ryokan',d:'Check-in Tag 7'},
+    {p:[35.202,139.049],n:'2',t:'Amazake-chaya',d:'10 Min Fussweg'},
+    {p:[35.243,139.022],n:'3',t:'Owakudani',d:'Tag 8 · 09:30'},
+    {p:[35.203,139.026],n:'4',t:'Hakone-jinja',d:'Tag 8 · 11:30'},
+    {p:[35.203,139.023],n:'5',t:'Salon de Thé Rosage',d:'Tag 8 · Lunch'},
+    {p:[35.244,139.054],n:'6',t:'Open-Air Museum',d:'Tag 9 · 09:00'},
+    {p:[35.256,139.155],n:'7',t:'Odawara Shinkansen',d:'Tag 9 · 14:45'}
+  ]},
+  kyoto: { id:'map-kyoto', c:[35.00,135.77], z:12, pts:[
+    {p:[35.007,135.773],n:'1',t:'Hotel Alza Kyoto',d:'Check-in'},
+    {p:[35.003,135.775],n:'2',t:'Gion Hanamikoji',d:'17:30 Maiko!'},
+    {p:[34.968,135.779],n:'3',t:'Fushimi Inari',d:'06:30 VOR 7 UHR!'},
+    {p:[35.005,135.765],n:'4',t:'Nishiki Market',d:'10:00'},
+    {p:[34.988,135.772],n:'5',t:'Sanjusangendo',d:'11:30'},
+    {p:[34.995,135.785],n:'6',t:'Kiyomizudera',d:'14:30'},
+    {p:[35.017,135.671],n:'7',t:'Arashiyama Bamboo',d:'06:30 VOR 7 UHR!'},
+    {p:[35.016,135.674],n:'8',t:'Tenryu-ji',d:'08:30'},
+    {p:[35.039,135.729],n:'9',t:'Kinkaku-ji',d:'10:30'},
+    {p:[34.669,135.503],n:'10',t:'Dotonbori Osaka',d:'~14:00 JR 28 Min'}
+  ]},
+  ishigaki: { id:'map-ishigaki', c:[24.48,124.20], z:11, pts:[
+    {p:[24.481,124.120],n:'1',t:'Club Med Kabira',d:'Check-in'},
+    {p:[24.461,124.143],n:'2',t:'Kabira Bay',d:'Glasbodenboot'},
+    {p:[24.453,124.186],n:'3',t:'Yonehara Beach',d:'Bestes Schnorcheln'},
+    {p:[24.610,124.316],n:'4',t:'Cape Hirakubo',d:'Nördlichste Spitze'},
+    {p:[24.336,124.094],n:'5',t:'Taketomi Island Ferry',d:'15 Min Fähre'}
+  ]}
+};
+
+function initMap(etappe) {
+  if (!stops[etappe] || mapsInit[etappe]) return;
+  mapsInit[etappe] = true;
+  const d = stops[etappe];
+  const el = document.getElementById(d.id);
+  if (!el || el._leaflet_id) return;
+  const map = L.map(el, {center:d.c, zoom:d.z, scrollWheelZoom:false});
+  L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',{attribution:'© OpenStreetMap',maxZoom:19}).addTo(map);
+  const col = MC[etappe] || '#C0392B';
+  const bounds = [];
+  d.pts.forEach(s => {
+    const icon = L.divIcon({className:'',
+      html:'<div style="background:'+col+';color:white;border-radius:50%;width:28px;height:28px;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:12px;font-family:sans-serif;border:2.5px solid white;box-shadow:0 2px 5px rgba(0,0,0,.3)">'+s.n+'</div>',
+      iconSize:[28,28],iconAnchor:[14,14]});
+    L.marker(s.p,{icon}).addTo(map).bindPopup('<strong>'+s.n+'. '+s.t+'</strong><br><span style="font-size:11px;color:#666">'+s.d+'</span>');
+    bounds.push(s.p);
+  });
+  if(bounds.length>1) L.polyline(bounds,{color:col,weight:2,opacity:.4,dashArray:'5,7'}).addTo(map);
+  if(bounds.length>1) map.fitBounds(bounds,{padding:[20,20]});
+}
+
+// Init tokyo map on load
+window.addEventListener('load',()=>setTimeout(()=>{},200));
+</script>
+</body>
+</html>
